@@ -1,0 +1,28 @@
+{
+  "name": "pirapire",
+  "version": "1.0.0",
+  "description": "Pirapire - Plataforma de backtest y trading de la estrategia Breakout para criptoactivos en Paraguay",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js",
+    "test:full": "node tests/all_checks.js",
+    "package:desktop": "node desktop/package-desktop.js"
+  },
+  "keywords": [
+    "pirapire",
+    "crypto",
+    "breakout",
+    "backtest",
+    "paraguay",
+    "binance"
+  ],
+  "author": "Pirapire Technologies",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

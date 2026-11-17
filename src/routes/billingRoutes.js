@@ -1,0 +1,78 @@
+// src/routes/billingRoutes.js - Billing & Payments Router
+const express = require('express');
+const router = express.Router();
+const PRICING_CONFIG = require('../billing/pricingConfig');
+const {
+  createCheckoutSession,
+  handleWebhookEvent,
+  getUserSubscriptionDetails
+} = require('../billing/paymentService');
+const { requireAuth } = require('../auth/authMiddleware');
+const { getDb } = require('../db/db');
+
+// GET /api/billing/plans - Single source of truth for Plans
+router.get('/plans', (req, res) => {
+  res.json({
+    success: true,
+    currency: PRICING_CONFIG.currency,
+    currencySymbol: PRICING_CONFIG.currencySymbol,
+    plans: PRICING_CONFIG.plans,
+    merchant: PRICING_CONFIG.merchant,
+    environment: PRICING_CONFIG.environment
+  });
+});
+
+// POST /api/billing/checkout - Initiate payment
+router.post('/checkout', requireAuth, (req, res) => {
+  try {
+    const { planCode = 'PRO' } = req.body;
+    const session = createCheckoutSession(req.user.id, planCode);
+    res.json({ success: true, session });
+  } catch (err) {
+    res.status(400).json({ error: 'CHECKOUT_FAILED', message: err.message });
+  }
+});
+
+// POST /api/billing/webhook - Payment provider webhook
+router.post('/webhook', (req, res) => {
+  try {
+    const signature = req.headers['x-pirapire-signature'] || req.headers['x-signature'];
+    const result = handleWebhookEvent(req.body, signature);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: 'WEBHOOK_FAILED', message: err.message });
+  }
+});
+
+// GET /api/billing/subscription - User subscription details
+router.get('/subscription', requireAuth, (req, res) => {
+  try {
+    const details = getUserSubscriptionDetails(req.user.id);
+    res.json({ success: true, ...details });
+  } catch (err) {
+    res.status(400).json({ error: 'SUBSCRIPTION_FETCH_FAILED', message: err.message });
+  }
+});
+
+// POST /api/billing/cancel - Schedule subscription cancellation
+router.post('/cancel', requireAuth, (req, res) => {
+  try {
+    const db = getDb();
+    db.prepare(`
+      UPDATE subscriptions
+      SET cancel_at_period_end = 1, updated_at = ?
+      WHERE user_id = ?
+    `).run(Date.now(), req.user.id);
+
+    const updated = getUserSubscriptionDetails(req.user.id);
+    res.json({
+      success: true,
+      message: 'Suscripción cancelada. Conservarás tu acceso Pro hasta el vencimiento del período pagado.',
+      ...updated
+    });
+  } catch (err) {
+    res.status(400).json({ error: 'CANCEL_FAILED', message: err.message });
+  }
+});
+
+module.exports = router;

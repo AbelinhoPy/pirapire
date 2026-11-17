@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pirapire — Probá la estrategia Breakout para cripto en Paraguay</title>
+  <meta name="description" content="Simulá y probá la estrategia algorítmica Breakout con velas reales de Binance. 5 backtests gratis para cuentas en Paraguay.">
+  <link rel="icon" type="image/png" href="/images/logo.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="/" class="brand-logo" title="Pirapire — Trading Algorítmico Cripto">
+        <img src="/images/logo.png" alt="Pirapire" class="brand-img-logo">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#como-funciona">Cómo funciona</a></li>
+        <li><a href="#simulador">Simulador Cripto</a></li>
+        <li><a href="/futbol" style="color:var(--amber-primary); font-weight:700;">⚽ Fútbol</a></li>
+        <li><a href="#planes">Planes</a></li>
+        <li><a href="#binance-testnet">Binance Testnet</a></li>
+      </ul>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="user-plan-badge"></span>
+        <button id="btn-auth-header" class="btn btn-secondary btn-sm">Iniciar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section (Axiom style) -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-header">
+        <span class="badge badge-amber">Estrategia Breakout • Datos Reales Binance</span>
+        <h1 class="hero-title">Bitcoin cayó.<br><span style="color:var(--amber-primary);">¿Qué habría hecho Breakout?</span></h1>
+        <p class="hero-subtitle">
+          Mirá dónde entró el bot, dónde salió y cómo terminó la simulación. Después probá con tus propias fechas.
+        </p>
+        <div class="hero-cta-group">
+          <a href="#simulador" class="btn btn-primary btn-lg" onclick="window.app.openAuthModal('register')">Probá gratis 5 veces</a>
+          <button class="btn btn-secondary btn-lg" onclick="document.getElementById('terminal-hero').scrollIntoView({behavior:'smooth'}); window.app.startHeroPlayback();">Ver simulación</button>
+        </div>
+      </div>
+
+      <!-- Axiom-style Dominant Terminal & Chart -->
+      <div id="terminal-hero" class="terminal-card">
+        <div class="terminal-header">
+          <div class="terminal-controls">
+            <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span>
+            <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#f59e0b;"></span>
+            <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981;"></span>
+            <span style="margin-left:8px; font-weight:700;">BTC/USDT • Canal Donchian 20 • Binance Spot</span>
+          </div>
+          <div class="terminal-playback">
+            <button id="hero-play-btn" title="Iniciar reproducción paso a paso">▶ Reproducir</button>
+            <button id="hero-pause-btn" style="display:none;" title="Pausar">⏸ Pausa</button>
+            <button id="hero-reset-btn" title="Reiniciar">↺ Reiniciar</button>
+          </div>
+        </div>
+
+        <div class="terminal-status-bar">
+          <div>
+            Estado bot: <span id="hero-status-badge" class="badge badge-muted">ESPERANDO RUPTURA</span>
+            <span id="hero-pnl-display" style="margin-left:12px; font-weight:700;">Sin posición activa</span>
+          </div>
+          <div id="hero-trade-info" style="color:var(--text-muted);">
+            Cargando velas verificadas...
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="hero-chart-canvas" class="chart-canvas"></canvas>
+        </div>
+
+        <div style="padding:10px 18px; background:#0c0d12; border-top:1px solid var(--border-color); font-size:11px; font-family:var(--font-mono); color:var(--text-muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+          <span>* Simulación histórica con saldo virtual sobre cotizaciones reales de Binance.</span>
+          <span style="color:#06b6d4;">Línea cian: Máximo 20 períodos • Stop Loss: ATR 2.0x</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Three Steps Funnel (Bitsgap style) -->
+  <section id="como-funciona" class="funnel-steps">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">El recorrido en tres pasos</h2>
+        <p class="section-desc">Diseñado para que compruebes los números antes de poner un solo guaraní.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">PASO 01</div>
+          <h3 class="step-title">Mirá el ejemplo real</h3>
+          <p class="step-text">
+            Revisá la corrida verificada con velas reales de Bitcoin. Observá las operaciones ganadoras, las pérdidas contenidas por el Stop Loss y el resultado neto final.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">PASO 02</div>
+          <h3 class="step-title">5 backtests gratis por cuenta</h3>
+          <p class="step-text">
+            Creá tu cuenta gratis con tu correo. Disponés de 5 simulaciones completas con tus propias fechas, pares cripto y parámetros. Si una corrida falla, el cupo no se consume.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">PASO 03</div>
+          <h3 class="step-title">Pasate a Pirapire Pro</h3>
+          <p class="step-text">
+            Accedé a backtests ilimitados, comparador de estrategias y descargá la aplicación para Windows con conexión segura a Binance Spot Testnet.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TrendSpider Strategy Tester Section -->
+  <section id="simulador" class="simulator-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="badge badge-amber">Strategy Tester</span>
+        <h2 class="section-title" style="margin-top:10px;">Simulador de Estrategia Breakout</h2>
+        <p class="section-desc">Elegí tu par, temporalidad y reglas. Mirá el informe completo de rendimiento y cada operación ejecutada.</p>
+      </div>
+
+      <div class="simulator-layout">
+        <!-- Sidebar Controls -->
+        <div class="params-card">
+          <div class="quota-indicator">
+            <div style="display:flex; justify-content:space-between; font-size:12px; font-family:var(--font-mono);">
+              <strong>Cupo de Pruebas:</strong>
+              <span id="quota-text">5 disponibles</span>
+            </div>
+            <div class="quota-bar-wrap">
+              <div id="quota-bar-fill" class="quota-bar-fill" style="width:100%;"></div>
+            </div>
+          </div>
+
+          <form id="simulator-form">
+            <div class="form-group">
+              <label class="form-label">Par de Negociación</label>
+              <select name="symbol" class="form-select">
+                <option value="BTCUSDT">BTC / USDT (Bitcoin)</option>
+                <option value="ETHUSDT">ETH / USDT (Ethereum)</option>
+                <option value="SOLUSDT">SOL / USDT (Solana)</option>
+                <option value="BNBUSDT">BNB / USDT (Binance Coin)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Temporalidad de Vela</label>
+              <select name="timeframe" class="form-select">
+                <option value="1d">1 Día (Diario - Recomendado)</option>
+                <option value="4h">4 Horas (Swing)</option>
+                <option value="1h">1 Hora (Intradía)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Período de Entrada (Lookback N)</label>
+              <input type="number" name="lookback" class="form-input" value="20" min="5" max="100">
+              <small style="color:var(--text-muted); font-size:11px;">Ruptura sobre el máximo de los últimos N períodos.</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Período de Salida (Exit M)</label>
+              <input type="number" name="exitLookback" class="form-input" value="10" min="3" max="50">
+              <small style="color:var(--text-muted); font-size:11px;">Salida si el precio perfora el mínimo de M períodos.</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Multiplicador Stop Loss ATR</label>
+              <input type="number" step="0.1" name="stopLossAtr" class="form-input" value="2.0" min="0" max="5">
+              <small style="color:var(--text-muted); font-size:11px;">Cierre protector a K veces el ATR desde la entrada.</small>
+            </div>
+
+            <button type="submit" id="sim-submit-btn" class="btn btn-primary" style="width:100%; margin-top:8px;">
+              Ejecutar Backtest
+            </button>
+          </form>
+        </div>
+
+        <!-- Main Results & Chart -->
+        <div>
+          <!-- Metrics Dashboard -->
+          <div id="metrics-container" class="metrics-grid">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- TrendSpider-style Interactive Chart -->
+          <div class="terminal-card" style="margin-top:0;">
+            <div class="terminal-header">
+              <span>Gráfico de Velas y Operaciones Ejecutadas</span>
+              <span style="color:var(--text-muted); font-size:11px;">Clickeá una fila en la tabla inferior para resaltarla</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="sim-chart-canvas" class="chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Selected Trade Detail Card -->
+          <div id="trade-detail-card" style="display:none;"></div>
+
+          <!-- TrendSpider-style Clickable Trade Table -->
+          <div class="trades-card">
+            <div style="padding:12px 18px; background:#0f1015; border-bottom:1px solid var(--border-color); font-size:13px; font-weight:700;">
+              Historial de Operaciones del Backtest
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>N°</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Tamaño</th>
+                    <th>Resultado</th>
+                    <th>Motivo de Salida</th>
+                    <th>Detalle</th>
+                  </tr>
+                </thead>
+                <tbody id="trades-table-body">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section (Bitsgap style with Paraguayan Guaraníes) -->
+  <section id="planes" class="pricing-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="badge badge-amber">Precios Transparentes</span>
+        <h2 class="section-title" style="margin-top:10px;">Elegí el plan que mejor se adapte</h2>
+        <p class="section-desc">Sin costos ocultos ni letras chicas. Precios expresados en Guaraníes (PYG).</p>
+      </div>
+
+      <div id="pricing-grid-container" class="pricing-grid">
+        <!-- Rendered dynamically from /api/billing/plans -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Binance Spot Testnet Section -->
+  <section id="binance-testnet" class="simulator-section">
+    <div class="container" style="max-width:900px;">
+      <div class="terminal-card" style="padding:28px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div>
+            <span id="testnet-status-badge" class="badge badge-green">ONLINE (TESTNET)</span>
+            <h3 style="margin-top:8px; font-size:22px;">Modo Binance Spot Testnet</h3>
+          </div>
+          <span class="badge badge-red">DINERO REAL DESACTIVADO</span>
+        </div>
+
+        <p style="color:var(--text-secondary); font-size:14px; line-height:1.6; margin-bottom:20px;">
+          Probá el ciclo completo de la estrategia Breakout en el entorno de desarrollo oficial de Binance:
+          <strong>Señal detectada → Vista previa con importes → Confirmación explícita del usuario → Transmisión de orden simulada.</strong>
+        </p>
+
+        <div style="background:#151821; border:1px solid var(--border-color); border-radius:6px; padding:16px; margin-bottom:20px;">
+          <div style="font-size:12px; font-family:var(--font-mono); color:var(--text-muted); margin-bottom:6px;">
+            SEGURIDAD Y COMPATIBILIDAD LEGAL:
+          </div>
+          <ul style="font-size:13px; color:var(--text-secondary); padding-left:18px; line-height:1.6;">
+            <li>El cliente abona exclusivamente la licencia de uso del software.</li>
+            <li>Tus saldos y fondos permanecen 100% bajo tu custodia en Binance.</li>
+            <li>Pirapire nunca solicita permisos de retiro (Withdrawal) en tus claves API.</li>
+            <li>El envío a producción con fondos reales requiere dictamen legal conforme a la normativa paraguaya.</li>
+          </ul>
+        </div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="window.app.handleSelectPlan('PRO')">Adquirir Pirapire Pro para descargar App</button>
+          <a href="/api/download/manifest" target="_blank" class="btn btn-secondary">Ver Checksum SHA-256 del Instalador</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="/images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
+        </div>
+        <div>
+          © 2026 Pirapire Technologies S.A. • Asunción y Ciudad del Este, Paraguay.
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        <p>
+          <strong>Aviso de Riesgo y Régimen Legal:</strong> El trading de criptoactivos implica riesgos sustanciales de pérdida de capital. Los rendimientos pasados simulados no garantizan resultados futuros. Esta plataforma provee herramientas informáticas de backtest y análisis estadístico y no constituye asesoramiento financiero ni captación de ahorros del público. Operaciones comerciales regidas bajo la Ley N° 4868/13 de Comercio Electrónico de la República del Paraguay.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="text-align:center; margin-bottom:16px;">
+        <img src="/images/logo.png" alt="Pirapire" style="height:32px; object-fit:contain;">
+      </div>
+      <div class="modal-header">
+        <h3 id="auth-modal-title">Iniciar sesión en Pirapire</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p id="auth-modal-notice" style="color:var(--amber-primary); font-size:13px; margin-bottom:14px;"></p>
+      <form id="auth-form">
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="auth-email" class="form-input" placeholder="ejemplo@correo.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="auth-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+        </div>
+        <button type="submit" id="auth-modal-submit" class="btn btn-primary" style="width:100%; margin-top:8px;">
+          Ingresar
+        </button>
+      </form>
+      <div style="margin-top:16px; text-align:center; font-size:13px;">
+        <a href="javascript:void(0)" id="auth-modal-toggle">¿No tenés cuenta? Registrate gratis</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUOTA EXHAUSTED MODAL -->
+  <div id="quota-exhausted-modal" class="modal-overlay">
+    <div class="modal-box" style="border-color:var(--amber-primary);">
+      <div class="modal-header">
+        <h3 style="color:var(--amber-primary);">Límite de 5 pruebas alcanzado</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p style="font-size:14px; color:var(--text-secondary); line-height:1.6;">
+        Completaste tus 5 backtests gratuitos. Guardamos tu configuración para que continúes sin perder tus avances:
+      </p>
+      <div id="quota-modal-params" style="background:#151821; padding:12px; border-radius:6px; font-family:var(--font-mono); font-size:12px; margin:14px 0; color:#f3f4f6;">
+      </div>
+      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:20px;">
+        Pasate a <strong>Pirapire Pro</strong> para desbloquear simulaciones ilimitadas, comparativas y descargar la aplicación.
+      </p>
+      <button class="btn btn-primary" style="width:100%;" onclick="document.getElementById('quota-exhausted-modal').classList.remove('active'); window.app.handleSelectPlan('PRO');">
+        Ver Planes y Activar Pirapire Pro
+      </button>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL (Sandbox Payment) -->
+  <div id="checkout-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Finalizar compra — Pirapire Pro</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div style="background:#151821; border:1px solid var(--border-color); border-radius:6px; padding:14px; margin-bottom:16px; font-size:13px;">
+        <p style="margin-bottom:6px;"><strong>Vendedor:</strong> Pirapire Technologies S.A.</p>
+        <p style="margin-bottom:6px;"><strong>Identificador:</strong> <span id="checkout-order-id" class="font-mono"></span></p>
+        <p style="margin-bottom:6px;"><strong>Total a pagar:</strong> <span id="checkout-amount" style="color:var(--amber-primary); font-weight:700; font-size:16px;"></span></p>
+        <p style="margin-bottom:6px;"><strong>Vigencia de acceso:</strong> <span id="checkout-expires"></span></p>
+        <p style="margin-bottom:0; color:var(--text-muted); font-size:11px;">Entorno de prueba (Sandbox Pagopar / SIPAP)</p>
+      </div>
+
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.5; margin-bottom:16px;">
+        * Al confirmar, aceptás las condiciones de retracto de 8 días de la Ley N° 4868/13 de Comercio Electrónico. El pago se verifica instantáneamente del lado del servidor.
+      </div>
+
+      <button id="checkout-simulate-pay-btn" class="btn btn-primary" style="width:100%;">
+        Confirmar y Pagar (Modo Sandbox)
+      </button>
+    </div>
+  </div>
+
+  <!-- ACCOUNT MODAL -->
+  <div id="account-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:540px;">
+      <div class="modal-header">
+        <h3>Mi Cuenta en Pirapire</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <div style="background:#151821; border-radius:6px; padding:16px; margin-bottom:20px; font-size:13px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span>Correo:</span> <strong id="acc-email" class="font-mono"></strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span>Plan activo:</span> <span id="acc-plan-badge" class="badge badge-amber"></span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span>Vencimiento:</span> <span id="acc-expires" class="font-mono"></span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Días restantes:</span> <span id="acc-remaining-days" class="font-mono"></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <h4 style="font-size:14px; margin-bottom:10px;">Descarga de Aplicación</h4>
+        <button id="acc-download-btn" class="btn btn-primary" style="width:100%; display:none;">
+          ⬇ Descargar Pirapire Desktop (Windows x64 v1.0.0)
+        </button>
+        <p id="acc-download-warning" style="color:var(--text-muted); font-size:12px; margin-top:6px; display:none;"></p>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:16px;">
+        <button id="acc-cancel-sub-btn" class="btn btn-secondary btn-sm" style="color:#ef4444; border-color:#ef4444; display:none;">
+          Cancelar renovación Pro
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="window.app.logout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Script -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
