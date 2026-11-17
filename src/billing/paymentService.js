@@ -82,10 +82,23 @@ function handleWebhookEvent(eventPayload, signature) {
     throw new Error(`Transacción para orderId ${orderId} no registrada.`);
   }
 
+  if (existingTx.status === 'REFUNDED') {
+    return {
+      success: false,
+      duplicate: true,
+      idempotentDuplicate: true,
+      status: 'ALREADY_REFUNDED',
+      message: 'Esta orden fue reembolsada previamente. Un evento tardío no puede reactivar el acceso.',
+      orderId
+    };
+  }
+
   if (existingTx.status === 'SUCCESS' && eventType === 'PAYMENT_SUCCESS') {
     return {
       success: true,
+      duplicate: true,
       idempotentDuplicate: true,
+      status: 'ALREADY_PROCESSED',
       message: 'Evento duplicado ya procesado previamente. No se aplican cambios adicionales.',
       orderId
     };
@@ -146,6 +159,7 @@ function handleWebhookEvent(eventPayload, signature) {
 
       return {
         success: true,
+        activated: true,
         status: 'ACTIVATED',
         plan: 'PRO',
         orderId,

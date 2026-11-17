@@ -67,7 +67,7 @@
     if (el.authBtn) {
       el.authBtn.addEventListener('click', () => {
         if (state.user) {
-          openAccountModal();
+          window.location.href = '/cuenta';
         } else {
           openAuthModal('login');
         }
@@ -138,14 +138,17 @@
 
   function updateAuthUI(user) {
     if (!el.authBtn) return;
+    const navCuenta = document.getElementById('nav-cuenta-link');
     if (user) {
       el.authBtn.textContent = 'Mi Cuenta';
+      if (navCuenta) navCuenta.style.display = 'inline-block';
       if (el.userPlanBadge) {
         el.userPlanBadge.textContent = user.plan;
         el.userPlanBadge.className = `badge ${user.plan === 'PRO' ? 'badge-amber' : 'badge-muted'}`;
       }
     } else {
       el.authBtn.textContent = 'Iniciar sesión';
+      if (navCuenta) navCuenta.style.display = 'none';
       if (el.userPlanBadge) el.userPlanBadge.textContent = '';
     }
   }

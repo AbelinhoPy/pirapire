@@ -76,7 +76,7 @@ test('Desktop Download Security: 403 for Free, 200 for Pro, SHA-256 validation',
   assert.strictEqual(manifestRes.body.manifest.sha256, manifest.sha256);
 
   // Verify file directly matches manifest hash
-  const zipPath = path.join(__dirname, '../public/downloads/Pirapire-Desktop-Windows-x64-v1.0.0.zip');
+  const zipPath = path.join(__dirname, '../storage/downloads/Pirapire-Desktop-Windows-x64-v1.0.0.zip');
   assert.ok(fs.existsSync(zipPath));
   const fileBytes = fs.readFileSync(zipPath);
   const actualHash = crypto.createHash('sha256').update(fileBytes).digest('hex');

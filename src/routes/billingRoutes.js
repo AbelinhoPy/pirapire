@@ -75,4 +75,34 @@ router.post('/cancel', requireAuth, (req, res) => {
   }
 });
 
+// GET /api/billing/receipt/:orderId - Protected single receipt with IDOR guard
+router.get('/receipt/:orderId', requireAuth, (req, res) => {
+  try {
+    const db = getDb();
+    const tx = db.prepare('SELECT * FROM payment_transactions WHERE order_id = ?').get(req.params.orderId);
+    if (!tx) {
+      return res.status(404).json({ error: 'RECEIPT_NOT_FOUND', message: 'Comprobante no encontrado.' });
+    }
+    if (tx.user_id !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'FORBIDDEN', message: 'No tenés permisos para ver este comprobante ajeno.' });
+    }
+    res.json({
+      success: true,
+      receipt: {
+        orderId: tx.order_id,
+        merchant: PRICING_CONFIG.merchant,
+        amountPyg: tx.amount_pyg,
+        amountFormatted: `₲ ${Number(tx.amount_pyg).toLocaleString('es-PY')}`,
+        currency: tx.currency,
+        status: tx.status,
+        paymentMethod: tx.payment_method,
+        createdAt: tx.created_at,
+        dateFormatted: new Date(tx.created_at).toLocaleDateString('es-PY', { day: '2-digit', month: 'long', year: 'numeric' })
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'RECEIPT_FETCH_ERROR', message: err.message });
+  }
+});
+
 module.exports = router;

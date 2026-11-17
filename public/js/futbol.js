@@ -62,9 +62,7 @@
     if (el.btnAuthHeader) {
       el.btnAuthHeader.addEventListener('click', () => {
         if (state.user) {
-          if (confirm(`Sesión iniciada como ${state.user.email} (${state.user.plan}). ¿Deseás cerrar sesión?`)) {
-            logout();
-          }
+          window.location.href = '/cuenta';
         } else {
           openAuthModal('login');
         }
@@ -137,8 +135,10 @@
   }
 
   function updateAuthUI(user) {
+    const navCuenta = document.getElementById('futbol-nav-cuenta');
     if (user) {
       el.btnAuthHeader.textContent = 'Mi Cuenta';
+      if (navCuenta) navCuenta.style.display = 'inline-block';
       if (user.plan === 'PRO') {
         el.userPlanBadge.textContent = 'PRO ACTIVO';
         el.userPlanBadge.className = 'badge badge-green';

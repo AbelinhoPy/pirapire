@@ -29,6 +29,14 @@ getDb();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Block unauthenticated direct access to downloads (Security protection)
+app.use('/downloads', (req, res) => {
+  res.status(403).json({
+    error: 'DIRECT_DOWNLOAD_BLOCKED',
+    message: 'El acceso directo a los archivos de instalación está bloqueado por seguridad. La descarga de Pirapire Desktop requiere autenticación y una suscripción activa a Pirapire Pro desde /api/download/pirapire-desktop.'
+  });
+});
+
 // Serve frontend static assets
 const PUBLIC_DIR = path.join(__dirname, 'public');
 app.use(express.static(PUBLIC_DIR));
@@ -40,13 +48,21 @@ app.use('/api/testnet', testnetRoutes);
 app.use('/api/demo', demoRoutes);
 app.use('/api/futbol', footballRoutes);
 
-// Dedicated route for Pirapire Fútbol
+// Dedicated routes for HTML views
 app.get('/futbol', (req, res) => {
-  const futbolPath = path.join(PUBLIC_DIR, 'futbol.html');
-  if (fs.existsSync(futbolPath)) {
-    return res.sendFile(futbolPath);
-  }
-  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+  res.sendFile(path.join(PUBLIC_DIR, 'futbol.html'));
+});
+
+app.get('/planes', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'planes.html'));
+});
+
+app.get('/cuenta', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'cuenta.html'));
+});
+
+app.get('/404', (req, res) => {
+  res.status(404).sendFile(path.join(PUBLIC_DIR, '404.html'));
 });
 
 // Backtest endpoints
@@ -72,18 +88,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Single Page Application Fallback for direct browser URLs
+// Fallback for unknown direct browser URLs
 app.use((req, res, next) => {
   if (req.method !== 'GET') return next();
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'ENDPOINT_NOT_FOUND', message: `Ruta de API ${req.path} no encontrada.` });
   }
-  const indexPath = path.join(PUBLIC_DIR, 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    next();
+  const page404 = path.join(PUBLIC_DIR, '404.html');
+  if (fs.existsSync(page404)) {
+    return res.status(404).sendFile(page404);
   }
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
 
 let serverInstance = null;

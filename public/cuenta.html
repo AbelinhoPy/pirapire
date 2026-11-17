@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Cuenta — Panel del Cliente Pirapire</title>
+  <meta name="description" content="Gestioná tu cuenta de Pirapire, consultá tus cupos disponibles de Cripto y Fútbol, revisá tus comprobantes y descargá Pirapire Desktop.">
+  <link rel="icon" type="image/png" href="/images/logo.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .dashboard-wrap {
+      padding: 40px 0 60px;
+    }
+    .profile-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .metric-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .metric-box {
+      background: #11141d;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .metric-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--amber-primary);
+      font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+    .download-hero-card {
+      background: linear-gradient(180deg, #131722 0%, #0d0f15 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 12px;
+      padding: 28px;
+      margin-top: 24px;
+    }
+    .hash-badge {
+      background: #1a1e2b;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #9ca3af;
+      word-break: break-all;
+      border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="/" class="brand-logo" title="Pirapire — Inicio">
+        <img src="/images/logo.png" alt="Pirapire" class="brand-img-logo">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/#simulador">Estrategia Cripto</a></li>
+        <li><a href="/futbol">⚽ Fútbol</a></li>
+        <li><a href="/planes">Planes</a></li>
+        <li><a href="/cuenta" class="active">Mi Cuenta</a></li>
+      </ul>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="header-user-plan" class="badge badge-amber"></span>
+        <button id="btn-logout" class="btn btn-secondary btn-sm" onclick="window.accountApp.logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Main -->
+  <main class="dashboard-wrap">
+    <div class="container" style="max-width:960px;">
+
+      <!-- Unauthenticated State Notice -->
+      <div id="unauth-box" style="display:none; text-align:center; padding:60px 20px;">
+        <h2 style="color:#fff; margin-bottom:12px;">Acceso a tu cuenta</h2>
+        <p style="color:var(--text-secondary); margin-bottom:24px;">Debés iniciar sesión para ver tu panel de cliente.</p>
+        <button class="btn btn-primary" onclick="window.location.href='/#iniciar-sesion'">Iniciar sesión / Registrarme</button>
+      </div>
+
+      <!-- Authenticated Dashboard -->
+      <div id="auth-dashboard" style="display:none;">
+
+        <!-- Header Card -->
+        <div class="profile-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <span id="plan-badge-view" class="badge badge-amber">PLAN BÁSICO</span>
+              <h2 id="user-email-view" style="color:#fff; margin:10px 0 4px; font-size:22px;">cargando...</h2>
+              <div id="account-status-subtext" style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
+                Registrado en Pirapire
+              </div>
+            </div>
+            <div>
+              <a href="/planes" id="btn-upgrade-view" class="btn btn-primary btn-sm">
+                Pasar a Pirapire Pro (₲ 190.000)
+              </a>
+            </div>
+          </div>
+
+          <!-- Quotas Metric Grid -->
+          <div class="metric-grid-2">
+            <div class="metric-box">
+              <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">CUPO BACKTESTS CRIPTO</span>
+              <div id="quota-backtests-view" class="metric-val">-</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">De 5 corridas gratuitas</div>
+            </div>
+
+            <div class="metric-box">
+              <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">CUPO PIRAPIRE FÚTBOL</span>
+              <div id="quota-football-view" class="metric-val">-</div>
+              <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">De 1 consulta interactiva</div>
+            </div>
+
+            <div class="metric-box">
+              <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">ESTADO DE SUSCRIPCIÓN</span>
+              <div id="sub-status-view" class="metric-val" style="font-size:18px;">Gratuito</div>
+              <div id="sub-expires-view" style="font-size:11px; color:var(--text-secondary); margin-top:4px;">Sin vencimiento</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Download Section (Protected) -->
+        <div class="download-hero-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
+            <div>
+              <span class="badge badge-amber">Software Exclusivo Pro</span>
+              <h3 style="color:#fff; margin:8px 0 4px;">Pirapire Desktop para Windows (x64)</h3>
+              <p style="font-size:13px; color:var(--text-secondary); margin:0;">
+                Terminal de monitoreo de señales Breakout y enlace interactivo a Binance Spot Testnet.
+              </p>
+            </div>
+            <div>
+              <a id="btn-download-desktop" href="/api/download/pirapire-desktop" class="btn btn-primary" style="display:none;">
+                ⬇️ Descargar ZIP (v1.0.0)
+              </a>
+              <a id="btn-download-pro-cta" href="/planes" class="btn btn-secondary">
+                🔒 Requiere Pirapire Pro para Descargar
+              </a>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <div style="font-size:11px; font-family:var(--font-mono); color:var(--text-muted); margin-bottom:6px;">
+              SUMA DE COMPROBACIÓN SHA-256 OFICIAL:
+            </div>
+            <div id="desktop-sha256-view" class="hash-badge">
+              Consultando manifiesto...
+            </div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-top:10px; line-height:1.6;">
+              <strong>Instrucciones Windows:</strong> Extraé el archivo ZIP y ejecutá <code>node pirapire-cli.js status</code> o <code>iniciar-pirapire.bat</code>. Consumo de RAM verificado: 45 MB.
+            </div>
+          </div>
+        </div>
+
+        <!-- Purchase Receipts / Invoices Table -->
+        <div class="profile-card" style="margin-top:24px;">
+          <h3 style="color:#fff; font-size:17px; margin-bottom:14px;">Comprobantes y Pagos Registrados</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Orden</th>
+                  <th>Fecha</th>
+                  <th>Importe</th>
+                  <th>Método</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="invoices-tbody">
+                <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:16px;">Cargando pagos...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Backtests History Table -->
+        <div class="profile-card" style="margin-top:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h3 style="color:#fff; font-size:17px; margin:0;">Historial de Backtests Cripto</h3>
+            <a href="/#simulador" class="btn btn-secondary btn-sm">Nueva simulación</a>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Par</th>
+                  <th>Temporalidad</th>
+                  <th>Retorno Neto</th>
+                  <th>Max DD</th>
+                  <th>Trades</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="backtests-tbody">
+                <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:16px;">Cargando historial...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="/images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
+          <span style="font-size:12px; font-weight:700; color:var(--amber-primary); font-family:var(--font-mono);">MI CUENTA</span>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted);">
+          Soporte: <a href="mailto:soporte@pirapire.com.py" style="color:var(--amber-primary);">soporte@pirapire.com.py</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      'use strict';
+      const state = {
+        user: null,
+        sessionToken: localStorage.getItem('pirapire_token') || null
+      };
+
+      async function apiCall(endpoint, options = {}) {
+        const headers = options.headers || {};
+        if (state.sessionToken) headers['Authorization'] = `Bearer ${state.sessionToken}`;
+        try {
+          const res = await fetch(endpoint, { credentials: 'same-origin', ...options, headers });
+          const json = await res.json();
+          return { status: res.status, ok: res.ok, data: json };
+        } catch (e) {
+          return { status: 500, ok: false, data: { message: e.message } };
+        }
+      }
+
+      async function init() {
+        if (!state.sessionToken) {
+          document.getElementById('unauth-box').style.display = 'block';
+          return;
+        }
+
+        const res = await apiCall('/api/auth/me');
+        if (res.ok && res.data.user) {
+          state.user = res.data.user;
+          renderDashboard(state.user);
+          await loadManifest();
+          await loadBacktestsHistory();
+        } else {
+          localStorage.removeItem('pirapire_token');
+          document.getElementById('unauth-box').style.display = 'block';
+        }
+      }
+
+      function renderDashboard(user) {
+        document.getElementById('auth-dashboard').style.display = 'block';
+        document.getElementById('header-user-plan').textContent = user.plan;
+        document.getElementById('user-email-view').textContent = user.email;
+
+        const isPro = user.plan === 'PRO';
+        const planBadge = document.getElementById('plan-badge-view');
+        planBadge.textContent = isPro ? 'PIRAPIRE PRO ACTIVO' : 'PLAN BÁSICO GRATUITO';
+        planBadge.className = `badge ${isPro ? 'badge-green' : 'badge-amber'}`;
+
+        document.getElementById('quota-backtests-view').textContent = isPro ? 'Ilimitados' : `${user.remainingFreeTests} restantes`;
+        document.getElementById('quota-football-view').textContent = isPro ? 'Ilimitadas' : `${user.remainingFootballQueries} restantes`;
+
+        const subStatusEl = document.getElementById('sub-status-view');
+        const subExpiresEl = document.getElementById('sub-expires-view');
+        const upgradeBtn = document.getElementById('btn-upgrade-view');
+        const btnDl = document.getElementById('btn-download-desktop');
+        const btnDlProCta = document.getElementById('btn-download-pro-cta');
+
+        if (isPro) {
+          subStatusEl.textContent = 'Activo';
+          subStatusEl.style.color = '#10b981';
+          upgradeBtn.style.display = 'none';
+          btnDl.style.display = 'inline-flex';
+          btnDlProCta.style.display = 'none';
+
+          if (user.subscription && user.subscription.expiresAtFormatted) {
+            subExpiresEl.textContent = `Vence el ${user.subscription.expiresAtFormatted}`;
+          }
+        } else {
+          subStatusEl.textContent = 'Básico';
+          subExpiresEl.textContent = 'Sin suscripción Pro';
+          btnDl.style.display = 'none';
+          btnDlProCta.style.display = 'inline-flex';
+        }
+
+        // Render Invoices Table
+        const tbody = document.getElementById('invoices-tbody');
+        tbody.innerHTML = '';
+        if (user.invoices && user.invoices.length > 0) {
+          user.invoices.forEach(inv => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="font-mono" style="color:#fff;">${inv.order_id}</td>
+              <td style="font-size:12px; color:var(--text-muted);">${inv.dateFormatted}</td>
+              <td style="font-weight:700; color:var(--amber-primary);">${inv.amountFormatted}</td>
+              <td style="font-size:12px;">${inv.payment_method || 'Sandbox'}</td>
+              <td><span class="badge ${inv.status === 'SUCCESS' ? 'badge-green' : 'badge-amber'}">${inv.status}</span></td>
+              <td>
+                <button class="btn btn-secondary btn-sm" onclick="alert('Comprobante ${inv.order_id}\\nVendedor: Pirapire Technologies S.A.\\nImporte: ${inv.amountFormatted}\\nEstado: ${inv.status}')">
+                  Ver detalle
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:16px;">Aún no se registran pagos en tu cuenta.</td></tr>';
+        }
+      }
+
+      async function loadManifest() {
+        const res = await apiCall('/api/download/manifest');
+        if (res.ok && res.data.manifest) {
+          const m = res.data.manifest;
+          document.getElementById('desktop-sha256-view').textContent = `${m.sha256} (${m.fileSizeFormatted})`;
+        }
+      }
+
+      async function loadBacktestsHistory() {
+        const res = await apiCall('/api/backtest/history');
+        const tbody = document.getElementById('backtests-tbody');
+        tbody.innerHTML = '';
+
+        if (res.ok && res.data.history && res.data.history.length > 0) {
+          res.data.history.forEach(run => {
+            const tr = document.createElement('tr');
+            const netColor = run.metrics.netReturnPct >= 0 ? '#10b981' : '#ef4444';
+            tr.innerHTML = `
+              <td style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">${new Date(run.createdAt).toLocaleDateString('es-PY')}</td>
+              <td style="font-weight:700; color:#fff;">${run.symbol}</td>
+              <td class="font-mono">${run.timeframe}</td>
+              <td style="font-weight:700; color:${netColor}; font-family:var(--font-mono);">${run.metrics.netReturnPct}%</td>
+              <td class="font-mono">${run.metrics.maxDrawdownPct}%</td>
+              <td>${run.metrics.totalTrades}</td>
+              <td>
+                <a href="/#simulador" class="btn btn-secondary btn-sm">Abrir</a>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:16px;">Aún no realizaste simulaciones con tu cuenta.</td></tr>';
+        }
+      }
+
+      window.accountApp = {
+        logout: () => {
+          localStorage.removeItem('pirapire_token');
+          window.location.href = '/';
+        }
+      };
+
+      document.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
+</body>
+</html>

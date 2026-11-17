@@ -4,7 +4,7 @@ const fs = require('fs');
 const { getDb } = require('../db/db');
 const { getUserSubscriptionDetails } = require('../billing/paymentService');
 
-const DOWNLOADS_DIR = path.join(__dirname, '../../public/downloads');
+const DOWNLOADS_DIR = path.join(__dirname, '../../storage/downloads');
 const MANIFEST_PATH = path.join(DOWNLOADS_DIR, 'manifest.json');
 const ZIP_PATH = path.join(DOWNLOADS_DIR, 'Pirapire-Desktop-Windows-x64-v1.0.0.zip');
 

@@ -3,12 +3,15 @@
   "platform": "win32-x64",
   "fileName": "Pirapire-Desktop-Windows-x64-v1.0.0.zip",
   "exeName": "Pirapire-Desktop-Setup.exe",
-  "fileSizeBytes": 6965,
-  "sha256": "b80ebdeb5ad45c101d23a9a0c7d785dc45bf7803ae698b159e3b834024350cdb",
+  "fileSizeBytes": 11379,
+  "fileSizeFormatted": "11.1 KB",
+  "sha256": "eae51ce484d346aaf4a8553a31d5d7d6f274374cc5790dab62ef48f8e4e8fe2f",
   "releaseDate": "2026-11-16",
+  "signingStatus": "UNSIGNED_BETA (Certificado autofirmado para beta cerrada; requiere firma Authenticode en producción)",
   "status": "PRODUCTION_READY",
   "requirements": {
     "os": "Windows 10 / 11 64-bit",
+    "runtime": "Node.js >= 20.0.0",
     "ram": "45 MB medidos en prueba",
     "disk": "15 MB"
   },

@@ -5,9 +5,20 @@ const readline = require('readline');
 const path = require('path');
 const fs = require('fs');
 
-const { runBacktest } = require('../src/engine/breakoutEngine');
-const { fetchCandles, getLiveTicker } = require('../src/binance/binanceClient');
-const { pingTestnet, createOrderPreview, executeTestnetOrder, IS_PRODUCTION_TRADING_ENABLED } = require('../src/binance/testnetClient');
+let engineModule, binanceModule, testnetModule;
+if (fs.existsSync(path.join(__dirname, 'src/engine/breakoutEngine.js'))) {
+  engineModule = require('./src/engine/breakoutEngine');
+  binanceModule = require('./src/binance/binanceClient');
+  testnetModule = require('./src/binance/testnetClient');
+} else {
+  engineModule = require('../src/engine/breakoutEngine');
+  binanceModule = require('../src/binance/binanceClient');
+  testnetModule = require('../src/binance/testnetClient');
+}
+
+const { runBacktest } = engineModule;
+const { fetchCandles, getLiveTicker } = binanceModule;
+const { pingTestnet, createOrderPreview, executeTestnetOrder, IS_PRODUCTION_TRADING_ENABLED } = testnetModule;
 
 const CONFIG_FILE = path.join(__dirname, 'pirapire_local_config.json');
 const SERVER_URL = process.env.PIRAPIRE_SERVER_URL || 'http://localhost:3000';

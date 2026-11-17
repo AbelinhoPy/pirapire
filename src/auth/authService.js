@@ -219,16 +219,60 @@ function getUserProfile(userId) {
 
   const remainingFreeTests = Math.max(0, 5 - completedBacktests);
 
+  // Count completed football queries
+  const completedFootballQueries = db.prepare(`
+    SELECT COUNT(*) as count
+    FROM football_quota_reservations
+    WHERE user_id = ? AND status = 'COMPLETED'
+  `).get(userId).count;
+
+  const remainingFootballQueries = Math.max(0, 1 - completedFootballQueries);
+
+  // Fetch subscription info
+  const sub = db.prepare(`
+    SELECT id, plan_code, status, amount_pyg, currency, started_at, expires_at, cancel_at_period_end
+    FROM subscriptions
+    WHERE user_id = ?
+    ORDER BY id DESC
+    LIMIT 1
+  `).get(userId);
+
+  // Fetch recent invoices
+  const invoices = db.prepare(`
+    SELECT id, order_id, amount_pyg, currency, status, payment_method, created_at
+    FROM payment_transactions
+    WHERE user_id = ?
+    ORDER BY id DESC
+    LIMIT 10
+  `).all(userId);
+
   return {
     id: user.id,
     email: user.email,
     emailVerified: Boolean(user.email_verified),
     plan: user.plan,
     role: user.role,
+    createdAt: user.created_at,
     completedBacktests,
     remainingFreeTests: user.plan === 'PRO' ? 'Ilimitados' : remainingFreeTests,
     canRunBacktest: user.plan === 'PRO' || remainingFreeTests > 0,
-    canDownloadDesktop: user.plan === 'PRO'
+    completedFootballQueries,
+    remainingFootballQueries: user.plan === 'PRO' ? 'Ilimitadas' : remainingFootballQueries,
+    canConsultFootball: user.plan === 'PRO' || remainingFootballQueries > 0,
+    canDownloadDesktop: user.plan === 'PRO',
+    subscription: sub ? {
+      planCode: sub.plan_code,
+      status: sub.status,
+      expiresAt: sub.expires_at,
+      expiresAtFormatted: new Date(sub.expires_at).toLocaleDateString('es-PY', { day: '2-digit', month: 'long', year: 'numeric' }),
+      cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
+      amountFormatted: `₲ ${Number(sub.amount_pyg).toLocaleString('es-PY')}`
+    } : null,
+    invoices: invoices.map(inv => ({
+      ...inv,
+      amountFormatted: `₲ ${Number(inv.amount_pyg).toLocaleString('es-PY')}`,
+      dateFormatted: new Date(inv.created_at).toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    }))
   };
 }
 

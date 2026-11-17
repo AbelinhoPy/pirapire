@@ -116,6 +116,7 @@ async function executeBacktestRun(req, res) {
           remainingFreeTests: 0,
           completedTests: completedCount,
           preservedParams: { symbol, timeframe, startDate, endDate, lookback, exitLookback, stopLossAtr, initialCapital },
+          preservedParameters: { symbol, timeframe, startDate, endDate, lookback, exitLookback, stopLossAtr, initialCapital },
           upgradeUrl: '/planes.html'
         });
       }
@@ -251,8 +252,8 @@ function getBacktestReport(req, res) {
   }
 
   // Authorization: either public example or owned by current user (or admin)
-  if (!run.is_public_example && run.user_id !== user.id) {
-    return res.status(403).json({ error: 'FORBIDDEN', message: 'No tenés permisos para ver este informe.' });
+  if (!run.is_public_example && (!user || run.user_id !== user.id)) {
+    return res.status(403).json({ error: 'FORBIDDEN', message: 'No tenés permisos para ver este informe privado.' });
   }
 
   return res.json({
