@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Planes y Precios — Pirapire Pro (Cripto y Fútbol)</title>
   <meta name="description" content="Elegí tu plan en Pirapire. Acceso unificado a la estrategia cripto Breakout y a las probabilidades de Pirapire Fútbol. Precios claros en Guaraníes (PYG).">
-  <link rel="icon" type="image/png" href="/images/logo.png">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="./images/logo.png">
+  <link rel="stylesheet" href="./css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -112,16 +112,16 @@
   <!-- Site Header -->
   <header class="site-header">
     <div class="container nav-wrap">
-      <a href="/" class="brand-logo" title="Pirapire — Inicio">
-        <img src="/images/logo.png" alt="Pirapire" class="brand-img-logo">
+      <a href="index.html" class="brand-logo" title="Pirapire — Inicio">
+        <img src="./images/logo.png" alt="Pirapire" class="brand-img-logo">
       </a>
 
       <ul class="nav-links">
-        <li><a href="/">Inicio</a></li>
-        <li><a href="/#simulador">Estrategia Cripto</a></li>
-        <li><a href="/futbol">⚽ Fútbol</a></li>
-        <li><a href="/planes" class="active">Planes</a></li>
-        <li><a href="/cuenta" id="nav-account-link" style="display:none;">Mi Cuenta</a></li>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="index.html#simulador">Estrategia Cripto</a></li>
+        <li><a href="futbol.html">⚽ Fútbol</a></li>
+        <li><a href="planes.html" class="active">Planes</a></li>
+        <li><a href="cuenta.html" id="nav-account-link" style="display:none;">Mi Cuenta</a></li>
       </ul>
 
       <div style="display:flex; align-items:center; gap:12px;">
@@ -466,7 +466,7 @@
             if (state.returnTo) {
               window.location.href = state.returnTo;
             } else {
-              window.location.href = '/cuenta';
+              window.location.href = 'cuenta.html';
             }
           } else {
             alert('Error al confirmar el pago en el sandbox.');
@@ -479,7 +479,7 @@
       window.planesApp = {
         handleFreeClick: () => {
           if (!state.user) openAuthModal('register');
-          else window.location.href = '/';
+          else window.location.href = 'index.html';
         },
         handleProClick
       };

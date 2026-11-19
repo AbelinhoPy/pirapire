@@ -67,7 +67,7 @@
     if (el.authBtn) {
       el.authBtn.addEventListener('click', () => {
         if (state.user) {
-          window.location.href = '/cuenta';
+          window.location.href = 'cuenta.html';
         } else {
           openAuthModal('login');
         }
@@ -176,11 +176,55 @@
 
   // Load Pricing Config
   async function loadPricingConfig() {
+    let pricing = null;
     const res = await apiCall('/api/billing/plans');
-    if (res.ok) {
-      state.pricing = res.data;
-      renderPricingCards(res.data);
+    if (res.ok && res.data && res.data.plans) {
+      pricing = res.data;
+    } else {
+      // Fallback for static GitHub Pages preview
+      pricing = {
+        plans: {
+          FREE: {
+            name: "Plan Inicial",
+            priceFormatted: "₲ 0",
+            priceUsdApprox: 0,
+            badge: "Acceso Gratuito",
+            description: "Probá la estrategia Breakout en Bitcoin y el análisis deportivo sin costo.",
+            features: [
+              "5 backtests históricos de Breakout con velas reales",
+              "1 consulta de fútbol paraguayo (análisis y Poisson)",
+              "Gráficos interactivos Donchian + ATR",
+              "Métricas completas de rendimiento y lista de trades"
+            ],
+            notIncluded: [
+              "Backtests ilimitados",
+              "Consultas ilimitadas de fútbol paraguayo",
+              "Comparador de equipos y métricas avanzadas",
+              "Descarga de Pirapire Desktop para Windows"
+            ],
+            ctaText: "Crear cuenta gratis"
+          },
+          PRO: {
+            name: "Pirapire Pro",
+            priceFormatted: "₲ 150.000",
+            priceUsdApprox: 20,
+            badge: "Acceso Total",
+            description: "Acceso unificado y sin límites a Cripto y Fútbol paraguayo.",
+            features: [
+              "Backtests ilimitados en todas las temporalidades",
+              "Consultas ilimitadas al bot de análisis de fútbol",
+              "Comparador directo de equipos y predicciones archivadas",
+              "Descarga inmediata de Pirapire Desktop (Windows x64)",
+              "Exportación de operaciones en CSV/JSON",
+              "Soporte prioritario por WhatsApp y Telegram"
+            ],
+            ctaText: "Comprar Pirapire Pro"
+          }
+        }
+      };
     }
+    state.pricing = pricing;
+    renderPricingCards(pricing);
   }
 
   function renderPricingCards(config) {
@@ -226,9 +270,20 @@
 
   // Load Hero Simulation (Verified Bitcoin Run)
   async function loadHeroSimulation() {
+    let hero = null;
     const res = await apiCall('/api/demo/hero-simulation');
-    if (res.ok && res.data.data) {
-      state.heroData = res.data.data;
+    if (res.ok && res.data && res.data.data) {
+      hero = res.data.data;
+    } else {
+      try {
+        const fallbackRes = await fetch('hero_run.json');
+        if (fallbackRes.ok) {
+          hero = await fallbackRes.json();
+        }
+      } catch (_) {}
+    }
+    if (hero) {
+      state.heroData = hero;
       resetHeroPlayback();
     }
   }
@@ -433,9 +488,22 @@
 
   // Load Baseline Public Example for Simulator
   async function loadPublicExample() {
+    let reportData = null;
     const res = await apiCall('/api/backtest/public-example');
-    if (res.ok) {
-      renderSimulatorReport(res.data);
+    if (res.ok && res.data) {
+      reportData = res.data;
+    } else if (state.heroData) {
+      reportData = state.heroData;
+    } else {
+      try {
+        const fallbackRes = await fetch('hero_run.json');
+        if (fallbackRes.ok) {
+          reportData = await fallbackRes.json();
+        }
+      } catch (_) {}
+    }
+    if (reportData) {
+      renderSimulatorReport(reportData);
     }
   }
 

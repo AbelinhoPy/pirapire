@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planes y Precios — Pirapire Pro (Cripto y Fútbol)</title>
+  <meta name="description" content="Elegí tu plan en Pirapire. Acceso unificado a la estrategia cripto Breakout y a las probabilidades de Pirapire Fútbol. Precios claros en Guaraníes (PYG).">
+  <link rel="icon" type="image/png" href="./images/logo.png">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .pricing-hero {
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+      margin-top: 36px;
+    }
+    .plan-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 36px 28px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+    .plan-card:hover {
+      border-color: rgba(245, 158, 11, 0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    }
+    .plan-card.highlight {
+      border: 2px solid var(--amber-primary);
+      background: linear-gradient(180deg, #161a25 0%, #0d0f15 100%);
+      box-shadow: 0 12px 32px rgba(245, 158, 11, 0.15);
+    }
+    .plan-badge-top {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--amber-primary);
+      color: #000;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.5px;
+    }
+    .plan-price-val {
+      font-size: 40px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: #fff;
+      margin: 16px 0 6px;
+    }
+    .plan-features-list {
+      list-style: none;
+      padding: 0;
+      margin: 24px 0 32px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 2;
+    }
+    .plan-features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--text-secondary);
+    }
+    .plan-features-list li.included strong {
+      color: #fff;
+    }
+    .plan-features-list li.included::before {
+      content: '✓';
+      color: var(--amber-primary);
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+    .plan-features-list li.not-included {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .plan-features-list li.not-included::before {
+      content: '✕';
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .legal-seller-box {
+      background: #11141d;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 50px;
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-logo" title="Pirapire — Inicio">
+        <img src="./images/logo.png" alt="Pirapire" class="brand-img-logo">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="index.html#simulador">Estrategia Cripto</a></li>
+        <li><a href="futbol.html">⚽ Fútbol</a></li>
+        <li><a href="planes.html" class="active">Planes</a></li>
+        <li><a href="cuenta.html" id="nav-account-link" style="display:none;">Mi Cuenta</a></li>
+      </ul>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="user-plan-badge" class="badge badge-muted"></span>
+        <button id="btn-auth-header" class="btn btn-secondary btn-sm">Iniciar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Pricing Hero -->
+  <section class="pricing-hero">
+    <div class="container" style="max-width:960px;">
+      <span class="badge badge-amber">Acceso Unificado • Cripto y Fútbol</span>
+      <h1 class="hero-title" style="margin:14px 0 8px;">Un solo plan para toda la plataforma</h1>
+      <p class="hero-subtitle">
+        Probá gratis con tu cuenta. Pasá a Pirapire Pro cuando necesites backtests ilimitados, análisis completo de Primera División y la aplicación para Windows.
+      </p>
+
+      <!-- Pricing Cards -->
+      <div class="pricing-grid">
+        
+        <!-- FREE PLAN -->
+        <div class="plan-card">
+          <div>
+            <span class="badge badge-muted">Plan Inicial</span>
+            <h3 style="margin-top:10px; font-size:22px; color:#fff;">Pirapire Básico</h3>
+            <div class="plan-price-val">Gratis</div>
+            <p style="font-size:13px; color:var(--text-muted);">Sin tarjeta de crédito requerida</p>
+
+            <ul class="plan-features-list">
+              <li class="included"><strong>5 backtests cripto</strong> completos de por vida</li>
+              <li class="included"><strong>1 consulta interactiva</strong> en Pirapire Fútbol</li>
+              <li class="included">Velas históricas reales de Binance (BTC, ETH, SOL)</li>
+              <li class="included">Ficha de partidos y fixture oficial de la APF</li>
+              <li class="included">Demo con saldo virtual y cotizaciones en vivo</li>
+              <li class="not-included">Consultas de fútbol ilimitadas</li>
+              <li class="not-included">Comparador directo de equipos APF</li>
+              <li class="not-included">Descarga de Pirapire Desktop para Windows</li>
+              <li class="not-included">Conexión a Binance Spot Testnet</li>
+            </ul>
+          </div>
+
+          <button id="btn-free-plan" class="btn btn-secondary" style="width:100%;" onclick="window.planesApp.handleFreeClick()">
+            Empezar gratis
+          </button>
+        </div>
+
+        <!-- PRO PLAN -->
+        <div class="plan-card highlight">
+          <div class="plan-badge-top">MÁS ELEGIDO — BETA CERRADA</div>
+          <div>
+            <span class="badge badge-amber">Acceso Compartido Cripto + Fútbol</span>
+            <h3 style="margin-top:10px; font-size:22px; color:var(--amber-primary);">Pirapire Pro</h3>
+            <div class="plan-price-val">₲ 190.000</div>
+            <p style="font-size:13px; color:var(--text-secondary);">Pago único por 30 días de acceso total (aprox. $25 USD)</p>
+
+            <ul class="plan-features-list">
+              <li class="included"><strong>Backtests cripto ilimitados</strong> en todas las temporalidades</li>
+              <li class="included"><strong>Consultas ilimitadas de fútbol</strong> con modelo Poisson</li>
+              <li class="included"><strong>Comparador directo de equipos</strong> de Primera División</li>
+              <li class="included"><strong>Descarga autorizada de Pirapire Desktop</strong> (Windows x64)</li>
+              <li class="included"><strong>Enlace con Binance Spot Testnet</strong> y confirmación de órdenes</li>
+              <li class="included">Exportación de operaciones e informes en CSV y JSON</li>
+              <li class="included">Historial pre-partido con verificación de aciertos y fallos</li>
+              <li class="included">Soporte prioritario por WhatsApp y correo en Paraguay</li>
+            </ul>
+          </div>
+
+          <button id="btn-pro-plan" class="btn btn-primary" style="width:100%; font-weight:700;" onclick="window.planesApp.handleProClick()">
+            Comprar Pirapire Pro (₲ 190.000)
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Seller Identity & Legal Information -->
+      <div class="legal-seller-box">
+        <div style="font-weight:700; color:#fff; font-size:14px; margin-bottom:8px; font-family:var(--font-mono);">
+          INFORMACIÓN COMERCIAL Y POLÍTICAS DE VENTA
+        </div>
+        <p style="margin-bottom:8px;">
+          <strong>Vendedor y Titular:</strong> Pirapire Technologies S.A. • RUC 80123456-7 (En trámite) • Asunción y Ciudad del Este, República del Paraguay.
+        </p>
+        <p style="margin-bottom:8px;">
+          <strong>Duración y Renovación:</strong> La suscripción Pro otorga 30 días corridos de vigencia. Podés cancelar en cualquier momento desde tu panel: conservarás el acceso activo hasta el último día pagado y no se realizarán cobros sorpresivos.
+        </p>
+        <p style="margin-bottom:8px;">
+          <strong>Derecho de Retracto (Ley N° 4868/13):</strong> De conformidad con el Artículo 27 de la Ley de Comercio Electrónico de Paraguay, tenés derecho a solicitar la rescisión y devolución dentro de los 8 (ocho) días posteriores a la compra en caso de disconformidad técnica y siempre que no haya existido uso abusivo del servicio.
+        </p>
+        <p style="margin-bottom:0;">
+          <strong>Contacto de Soporte:</strong> Correo: <a href="mailto:soporte@pirapire.com.py" style="color:var(--amber-primary);">soporte@pirapire.com.py</a> • Atención de lunes a viernes de 08:00 a 18:00 hs (Horario de Asunción).
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="/images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
+          <span style="font-size:12px; font-weight:700; color:var(--amber-primary); font-family:var(--font-mono);">PLANES</span>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted);">
+          © 2026 Pirapire Technologies S.A. • Todos los derechos reservados.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="auth-modal-title">Acceder a Pirapire</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p id="auth-modal-notice" style="color:var(--amber-primary); font-size:13px; margin-bottom:14px;"></p>
+      <form id="auth-form">
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="auth-email" class="form-input" placeholder="ejemplo@correo.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="auth-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+        </div>
+        <button type="submit" id="auth-modal-submit" class="btn btn-primary" style="width:100%; margin-top:8px;">
+          Ingresar
+        </button>
+      </form>
+      <div style="margin-top:16px; text-align:center; font-size:13px;">
+        <a href="javascript:void(0)" id="auth-modal-toggle">¿No tenés cuenta? Registrate gratis</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL (Sandbox Payment) -->
+  <div id="checkout-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Finalizar compra — Pirapire Pro</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div style="background:#151821; border:1px solid var(--border-color); border-radius:6px; padding:14px; margin-bottom:16px; font-size:13px; line-height:1.6;">
+        <p style="margin-bottom:6px;"><strong>Vendedor:</strong> Pirapire Technologies S.A.</p>
+        <p style="margin-bottom:6px;"><strong>Orden:</strong> <span id="checkout-order-id" class="font-mono">PIR-PENDING</span></p>
+        <p style="margin-bottom:6px;"><strong>Total a pagar:</strong> <span style="color:var(--amber-primary); font-weight:700;">₲ 190.000</span></p>
+        <p style="margin-bottom:6px;"><strong>Cobertura:</strong> Acceso completo por 30 días a Cripto Pro y Fútbol Pro</p>
+        <p style="margin-bottom:0; color:var(--text-muted); font-size:11px;">Entorno de prueba simulado (SIPAP / Bancard / Pagopar Sandbox)</p>
+      </div>
+      <button id="checkout-pay-btn" class="btn btn-primary" style="width:100%; font-weight:700;">
+        Confirmar y Activar Pro (Sandbox)
+      </button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+      const state = {
+        user: null,
+        sessionToken: localStorage.getItem('pirapire_token') || null,
+        returnTo: new URLSearchParams(window.location.search).get('returnTo') || null
+      };
+
+      async function apiCall(endpoint, options = {}) {
+        const headers = options.headers || {};
+        if (state.sessionToken) headers['Authorization'] = `Bearer ${state.sessionToken}`;
+        if (options.body && typeof options.body === 'object') {
+          headers['Content-Type'] = 'application/json';
+          options.body = JSON.stringify(options.body);
+        }
+        try {
+          const res = await fetch(endpoint, { credentials: 'same-origin', ...options, headers });
+          const json = await res.json();
+          return { status: res.status, ok: res.ok, data: json };
+        } catch (e) {
+          return { status: 500, ok: false, data: { message: e.message } };
+        }
+      }
+
+      async function init() {
+        // Modal closes
+        document.querySelectorAll('.modal-close, .modal-overlay').forEach(el => {
+          el.addEventListener('click', (e) => {
+            if (e.target === el || e.target.classList.contains('modal-close')) {
+              el.closest('.modal-overlay').classList.remove('active');
+            }
+          });
+        });
+
+        const authBtn = document.getElementById('btn-auth-header');
+        if (authBtn) {
+          authBtn.addEventListener('click', () => {
+            if (state.user) window.location.href = '/cuenta';
+            else openAuthModal('login');
+          });
+        }
+
+        await loadAuth();
+      }
+
+      async function loadAuth() {
+        if (!state.sessionToken) {
+          updateAuthUI(null);
+          return;
+        }
+        const res = await apiCall('/api/auth/me');
+        if (res.ok && res.data.user) {
+          state.user = res.data.user;
+          updateAuthUI(state.user);
+        } else {
+          state.sessionToken = null;
+          localStorage.removeItem('pirapire_token');
+          updateAuthUI(null);
+        }
+      }
+
+      function updateAuthUI(user) {
+        const badge = document.getElementById('user-plan-badge');
+        const authBtn = document.getElementById('btn-auth-header');
+        const navAccount = document.getElementById('nav-account-link');
+        const proBtn = document.getElementById('btn-pro-plan');
+
+        if (user) {
+          if (authBtn) authBtn.textContent = 'Mi Cuenta';
+          if (navAccount) navAccount.style.display = 'inline-block';
+          if (user.plan === 'PRO') {
+            badge.textContent = 'PRO ACTIVO';
+            badge.className = 'badge badge-green';
+            if (proBtn) {
+              proBtn.textContent = 'Tu suscripción Pro está activa';
+              proBtn.onclick = () => window.location.href = '/cuenta';
+            }
+          } else {
+            badge.textContent = 'PLAN BÁSICO';
+            badge.className = 'badge badge-amber';
+          }
+        } else {
+          if (authBtn) authBtn.textContent = 'Iniciar sesión';
+          badge.textContent = 'VISITANTE';
+          badge.className = 'badge badge-muted';
+        }
+      }
+
+      function openAuthModal(mode = 'login', notice = '') {
+        const modal = document.getElementById('auth-modal');
+        const title = document.getElementById('auth-modal-title');
+        const submit = document.getElementById('auth-modal-submit');
+        const toggle = document.getElementById('auth-modal-toggle');
+        const noticeEl = document.getElementById('auth-modal-notice');
+
+        if (noticeEl) noticeEl.textContent = notice || '';
+        if (mode === 'register') {
+          title.textContent = 'Crear cuenta en Pirapire';
+          submit.textContent = 'Registrarme y continuar';
+          toggle.textContent = '¿Ya tenés cuenta? Iniciá sesión';
+          toggle.onclick = () => openAuthModal('login');
+        } else {
+          title.textContent = 'Iniciar sesión en Pirapire';
+          submit.textContent = 'Ingresar a mi cuenta';
+          toggle.textContent = '¿No tenés cuenta? Registrate gratis';
+          toggle.onclick = () => openAuthModal('register');
+        }
+
+        const form = document.getElementById('auth-form');
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('auth-email').value;
+          const password = document.getElementById('auth-password').value;
+          const endpoint = mode === 'register' ? '/api/auth/register' : '/api/auth/login';
+
+          const res = await apiCall(endpoint, {
+            method: 'POST',
+            body: { email, password }
+          });
+
+          if (res.ok) {
+            state.sessionToken = res.data.sessionToken;
+            localStorage.setItem('pirapire_token', res.data.sessionToken);
+            modal.classList.remove('active');
+            await loadAuth();
+            alert(mode === 'register' ? '¡Cuenta creada! Ya tenés acceso a tus 5 backtests y a Pirapire Fútbol.' : '¡Bienvenido de vuelta!');
+          } else {
+            alert(res.data.message || 'Error en autenticación');
+          }
+        };
+
+        modal.classList.add('active');
+      }
+
+      async function handleProClick() {
+        if (!state.user) {
+          openAuthModal('register', 'Creá tu cuenta gratis para suscribirte a Pirapire Pro.');
+          return;
+        }
+
+        const res = await apiCall('/api/billing/checkout', {
+          method: 'POST',
+          body: { planCode: 'PRO' }
+        });
+
+        if (res.ok && res.data.session) {
+          openCheckout(res.data.session);
+        } else {
+          alert('Error creando sesión de pago: ' + (res.data.message || ''));
+        }
+      }
+
+      function openCheckout(session) {
+        const modal = document.getElementById('checkout-modal');
+        document.getElementById('checkout-order-id').textContent = session.orderId;
+        const payBtn = document.getElementById('checkout-pay-btn');
+
+        payBtn.onclick = async () => {
+          payBtn.disabled = true;
+          payBtn.textContent = 'Verificando pago sandbox...';
+
+          const webhookRes = await apiCall('/api/billing/webhook', {
+            method: 'POST',
+            body: {
+              eventType: 'PAYMENT_SUCCESS',
+              orderId: session.orderId,
+              idempotencyKey: `idem_planes_${session.orderId}_${Date.now()}`,
+              amountPyg: session.amountPyg,
+              paymentMethod: 'SIPAP_TRANSFER'
+            }
+          });
+
+          payBtn.disabled = false;
+          payBtn.textContent = 'Confirmar y Activar Pro (Sandbox)';
+
+          if (webhookRes.ok) {
+            modal.classList.remove('active');
+            alert('¡Pago verificado con éxito! Tu acceso a Pirapire Pro ha sido activado.');
+            await loadAuth();
+
+            // Redirect back if user was interrupted during backtest or football query
+            if (state.returnTo) {
+              window.location.href = state.returnTo;
+            } else {
+              window.location.href = 'cuenta.html';
+            }
+          } else {
+            alert('Error al confirmar el pago en el sandbox.');
+          }
+        };
+
+        modal.classList.add('active');
+      }
+
+      window.planesApp = {
+        handleFreeClick: () => {
+          if (!state.user) openAuthModal('register');
+          else window.location.href = 'index.html';
+        },
+        handleProClick
+      };
+
+      document.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
+</body>
+</html>

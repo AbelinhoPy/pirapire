@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pirapire Fútbol — Análisis Estadístico de Primera División de Paraguay</title>
+  <meta name="description" content="Previa, probabilidades Poisson y análisis estadístico de la División Profesional de Paraguay. Preguntale a Pirapire quién llega mejor.">
+  <link rel="icon" type="image/png" href="./images/logo.png">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .match-protagonist-card {
+      background: linear-gradient(180deg, #131620 0%, #0d0f15 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 14px;
+      padding: 32px 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.7);
+    }
+    .match-protagonist-card::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .teams-versus {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      margin: 28px 0;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .team-block {
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+    .team-crest-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #1a1e2b;
+      border: 2px solid var(--border-color);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--amber-primary);
+      margin-bottom: 10px;
+    }
+    .team-name-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .vs-circle {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--amber-primary);
+      background: #1f2433;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+    .fixtures-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .fixture-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .fixture-item-card:hover, .fixture-item-card.selected {
+      border-color: var(--amber-primary);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    .chat-bubble-response {
+      background: #11141d;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 18px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    .prob-bar-container {
+      margin: 16px 0;
+      background: #1a1d26;
+      border-radius: 6px;
+      height: 28px;
+      display: flex;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .prob-seg-home { background: #10b981; color: #000; display: flex; align-items: center; justify-content: center; }
+    .prob-seg-draw { background: #6b7280; color: #fff; display: flex; align-items: center; justify-content: center; }
+    .prob-seg-away { background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; }
+    
+    .sponsor-banner-box {
+      background: #151821;
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .sponsor-tag {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--amber-primary);
+      background: rgba(245, 158, 11, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    .quick-prompt-btn {
+      background: #1c202d;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .quick-prompt-btn:hover {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: var(--amber-primary);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-logo" title="Pirapire — Inicio">
+        <img src="./images/logo.png" alt="Pirapire" class="brand-img-logo">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html">Estrategia Cripto</a></li>
+        <li><a href="#destacado" class="active">Partido Destacado</a></li>
+        <li><a href="#partidos">Partidos de la Fecha</a></li>
+        <li><a href="#analisis">Preguntale a Pirapire</a></li>
+        <li><a href="#comparador">Comparador Pro</a></li>
+        <li><a href="planes.html">Planes</a></li>
+        <li><a href="cuenta.html" id="futbol-nav-cuenta" style="display:none;">Mi Cuenta</a></li>
+      </ul>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="user-plan-badge" class="badge badge-muted"></span>
+        <button id="btn-auth-header" class="btn btn-secondary btn-sm">Iniciar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section: Featured Match (Protagonista de Pantalla) -->
+  <section id="destacado" class="hero-section">
+    <div class="container">
+      <div style="text-align:center; margin-bottom:20px;">
+        <span class="badge badge-amber">División Profesional de la APF • Paraguay</span>
+        <h1 class="hero-title" style="margin:12px 0 6px;">Pirapire Fútbol</h1>
+        <p class="hero-subtitle">
+          Análisis estadístico basado en datos reales y modelo de distribución Poisson.
+        </p>
+      </div>
+
+      <!-- Axiom Visual Protagonist Card -->
+      <div class="match-protagonist-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <span class="badge badge-amber">PARTIDO DESTACADO</span>
+            <span id="featured-competition" style="color:var(--text-muted); font-size:12px; font-family:var(--font-mono); margin-left:8px;">
+              Torneo Clausura — Fecha 17
+            </span>
+          </div>
+          <div>
+            <span id="featured-status-badge" class="badge badge-green">PROGRAMADO</span>
+            <span id="featured-kickoff" class="font-mono" style="font-size:13px; margin-left:8px; color:#fff;">
+              Domingo 19:30 hs (Horario de Asunción)
+            </span>
+          </div>
+        </div>
+
+        <div class="teams-versus">
+          <div class="team-block">
+            <div class="team-crest-badge">OLI</div>
+            <div id="featured-home-name" class="team-name-title">Club Olimpia</div>
+            <div id="featured-home-form" class="font-mono" style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+              Forma: V - V - E - V - D
+            </div>
+            <div style="font-size:12px; color:#10b981; margin-top:2px;">Invicto de local (7V - 2E)</div>
+          </div>
+
+          <div class="vs-circle">VS</div>
+
+          <div class="team-block">
+            <div class="team-crest-badge" style="color:#3b82f6;">CCP</div>
+            <div id="featured-away-name" class="team-name-title">Club Cerro Porteño</div>
+            <div id="featured-away-form" class="font-mono" style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+              Forma: V - D - V - E - V
+            </div>
+            <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Visitante: 4V - 3E - 2D</div>
+          </div>
+        </div>
+
+        <div style="text-align:center; font-size:13px; color:var(--text-secondary); margin-bottom:24px;">
+          Estadio Defensores del Chaco (Asunción) • Árbitro: Carlos Paul Benítez
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+          <a href="#analisis" class="btn btn-primary btn-lg" onclick="window.futbolApp.selectFeaturedMatchForAnalysis()">
+            ⚽ Preguntale a Pirapire
+          </a>
+          <button class="btn btn-secondary btn-lg" onclick="document.getElementById('partidos').scrollIntoView({behavior:'smooth'})">
+            Ver Todos los Partidos
+          </button>
+        </div>
+
+        <!-- Optional Sponsorship Box (Publicidad) -->
+        <div id="sponsorship-box" class="sponsor-banner-box" style="display:none;">
+          <div>
+            <span class="sponsor-tag">Publicidad</span>
+            <strong id="sponsor-brand" style="margin-left:8px; color:#fff;"></strong>
+            <p id="sponsor-tagline" style="font-size:12px; color:var(--text-secondary); margin:4px 0 0;"></p>
+          </div>
+          <div>
+            <a id="sponsor-cta-btn" href="#" target="_blank" class="btn btn-secondary btn-sm" onclick="window.futbolApp.handleSponsorClick()"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fixture of the Round Section -->
+  <section id="partidos" class="funnel-steps" style="padding-top:40px;">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:24px;">
+        <span class="badge badge-amber">Fixture Oficial</span>
+        <h2 class="section-title" style="margin-top:8px;">Partidos de la Fecha</h2>
+        <p class="section-desc">Seleccioná un partido para abrir su ficha y consultar el análisis estadístico.</p>
+      </div>
+
+      <div id="fixtures-container" class="fixtures-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Analysis Section -->
+  <section id="analisis" class="simulator-section">
+    <div class="container" style="max-width:920px;">
+      <div class="section-head">
+        <span class="badge badge-amber">Chat Analítico</span>
+        <h2 class="section-title" style="margin-top:8px;">¿Quién llega mejor? Preguntale a Pirapire</h2>
+        <p class="section-desc">Respuestas fundamentadas en datos verificables de la APF y cálculo matemático de probabilidades.</p>
+      </div>
+
+      <div class="terminal-card" style="padding:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+          <div>
+            <label class="form-label">Partido seleccionado para análisis:</label>
+            <select id="chat-match-select" class="form-select" style="min-width:300px;" onchange="window.futbolApp.onMatchSelectChange(this.value)">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+          <div id="chat-quota-badge" class="badge badge-muted">
+            1 consulta gratis disponible
+          </div>
+        </div>
+
+        <!-- Quick Prompts Buttons -->
+        <div style="margin-bottom:18px;">
+          <div style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono); margin-bottom:8px;">
+            Consultas rápidas:
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="quick-prompt-btn" onclick="window.futbolApp.askQuick('¿Quién llega mejor?')">
+              ¿Quién llega mejor?
+            </button>
+            <button class="quick-prompt-btn" onclick="window.futbolApp.askQuick('¿Quién tiene más chances de ganar?')">
+              ¿Quién tiene más chances de ganar?
+            </button>
+            <button class="quick-prompt-btn" onclick="window.futbolApp.askQuick('¿Cómo vienen jugando de local y visitante?')">
+              ¿Cómo vienen jugando de local y visitante?
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Query Input -->
+        <form id="football-query-form" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input type="text" id="football-custom-question" class="form-input" placeholder="O escribí tu consulta sobre el partido..." style="flex:1; min-width:260px;" required>
+          <button type="submit" id="football-submit-btn" class="btn btn-primary">
+            Consultar a Pirapire
+          </button>
+        </form>
+
+        <!-- Response Bubble -->
+        <div id="chat-response-area">
+          <div class="chat-bubble-response" id="chat-bubble-content">
+            <div style="display:flex; justify-content:space-between; color:var(--text-muted); font-size:12px; font-family:var(--font-mono); margin-bottom:10px;">
+              <span>Consulta de muestra gratuita (Público)</span>
+              <span id="response-timestamp">Actualizado hace instantes</span>
+            </div>
+            <div id="response-text-body" style="white-space: pre-line;">
+              Mirá cómo llegan para el partido en Estadio Defensores del Chaco:
+
+              • **Club Olimpia**: Cosechó 10 de 15 puntos en sus últimas 5 fechas (Racha: V - V - E - V - D). En condición de local se mantiene invicto con 7 victorias y 2 empates.
+              • **Club Cerro Porteño**: Sumó 9 de 15 puntos en sus últimos 5 juegos (Racha: V - D - V - E - V). Como visitante registra 4 victorias y 12 goles anotados.
+
+              En balance de momento reciente, **Club Olimpia** presenta mayor regularidad en la previa.
+            </div>
+
+            <!-- Probability Bar -->
+            <div id="response-prob-bar-container" style="margin-top:16px;">
+              <div style="font-size:11px; font-family:var(--font-mono); color:var(--text-muted); margin-bottom:4px; display:flex; justify-content:space-between;">
+                <span>Local: 45.2%</span>
+                <span>Empate: 29.6%</span>
+                <span>Visitante: 25.2%</span>
+              </div>
+              <div class="prob-bar-container">
+                <div class="prob-seg-home" style="width:45.2%;">45.2%</div>
+                <div class="prob-seg-draw" style="width:29.6%;">29.6%</div>
+                <div class="prob-seg-away" style="width:25.2%;">25.2%</div>
+              </div>
+            </div>
+
+            <div id="response-factors-list" style="margin-top:14px; font-size:12px; color:var(--text-secondary); border-top:1px solid var(--border-color); padding-top:10px;">
+              <strong>Factores estadísticos:</strong>
+              <ul style="padding-left:18px; margin-top:4px;">
+                <li>Efectividad de local: Olimpia invicto en 9 juegos en Asunción.</li>
+                <li>Goles esperados Poisson: Olimpia 1.52 - Cerro Porteño 1.05.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pro Team Comparison Section -->
+  <section id="comparador" class="funnel-steps">
+    <div class="container" style="max-width:920px;">
+      <div class="section-head">
+        <span class="badge badge-amber">Función Exclusiva Pro</span>
+        <h2 class="section-title" style="margin-top:8px;">Comparador Directo de Equipos</h2>
+        <p class="section-desc">Compará métricas de ataque, defensa y vallas invictas de cualquier par de equipos paraguayos.</p>
+      </div>
+
+      <div class="terminal-card" style="padding:24px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:18px;">
+          <div>
+            <label class="form-label">Equipo A</label>
+            <select id="compare-team-a" class="form-select">
+              <option value="Club Olimpia">Club Olimpia</option>
+              <option value="Club Libertad">Club Libertad</option>
+              <option value="Sportivo Luqueño">Sportivo Luqueño</option>
+              <option value="Club Nacional">Club Nacional</option>
+              <option value="2 de Mayo (PJC)">2 de Mayo (PJC)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Equipo B</label>
+            <select id="compare-team-b" class="form-select">
+              <option value="Club Cerro Porteño">Club Cerro Porteño</option>
+              <option value="Club Guaraní">Club Guaraní</option>
+              <option value="Club Sol de América">Club Sol de América</option>
+              <option value="Sportivo Ameliano">Sportivo Ameliano</option>
+              <option value="Sportivo Trinidense">Sportivo Trinidense</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="compare-btn" class="btn btn-primary" style="width:100%;" onclick="window.futbolApp.handleCompareClick()">
+          Comparar Equipos (Requiere Pro)
+        </button>
+
+        <div id="compare-results" style="display:none; margin-top:20px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Transparent Historical Predictions Archive -->
+  <section class="simulator-section">
+    <div class="container" style="max-width:920px;">
+      <div class="section-head">
+        <span class="badge badge-muted">Trazabilidad</span>
+        <h2 class="section-title" style="margin-top:8px;">Historial de Pronósticos Publicados</h2>
+        <p class="section-desc">Pronósticos fechados antes del inicio con su posterior resultado real.</p>
+      </div>
+
+      <div class="trades-card" style="margin-top:0;">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Partido</th>
+                <th>Fecha Emisión</th>
+                <th>Pronóstico Poisson</th>
+                <th>Marcador Real</th>
+                <th>Evaluación</th>
+              </tr>
+            </thead>
+            <tbody id="predictions-history-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="./images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
+          <span style="font-size:12px; font-weight:700; color:var(--amber-primary); font-family:var(--font-mono);">FÚTBOL</span>
+        </div>
+        <div>
+          © 2026 Pirapire Technologies S.A. • Asunción y Ciudad del Este, Paraguay.
+        </div>
+      </div>
+
+      <div class="footer-legal">
+        <p>
+          <strong>Aviso Legal y de Responsabilidad:</strong> Pirapire Fútbol provee herramientas informáticas de análisis estadístico, distribuciones de probabilidad Poisson y seguimiento de la División Profesional de la Asociación Paraguaya de Fútbol (APF). No es una casa de apuestas deportivas, no recibe depósitos, no gestiona apuestas ni ofrece premios en dinero. El titular del servicio no promueve actividades de azar no autorizadas bajo la Ley N° 1016/97 de la República del Paraguay.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="text-align:center; margin-bottom:16px;">
+        <img src="./images/logo.png" alt="Pirapire" style="height:32px; object-fit:contain;">
+      </div>
+      <div class="modal-header">
+        <h3 id="auth-modal-title">Iniciar sesión en Pirapire</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p id="auth-modal-notice" style="color:var(--amber-primary); font-size:13px; margin-bottom:14px;"></p>
+      <form id="auth-form">
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="auth-email" class="form-input" placeholder="ejemplo@correo.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="auth-password" class="form-input" placeholder="Mínimo 6 caracteres" required>
+        </div>
+        <button type="submit" id="auth-modal-submit" class="btn btn-primary" style="width:100%; margin-top:8px;">
+          Ingresar
+        </button>
+      </form>
+      <div style="margin-top:16px; text-align:center; font-size:13px;">
+        <a href="javascript:void(0)" id="auth-modal-toggle">¿No tenés cuenta? Registrate gratis</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUOTA EXHAUSTED MODAL (Preserves Question & Directs to Pro) -->
+  <div id="football-quota-modal" class="modal-overlay">
+    <div class="modal-box" style="border-color:var(--amber-primary);">
+      <div class="modal-header">
+        <h3 style="color:var(--amber-primary);">Consulta gratuita completada</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p style="font-size:14px; color:var(--text-secondary); line-height:1.6;">
+        Ya utilizaste tu consulta gratuita de Pirapire Fútbol. Guardamos tu partido y tu pregunta para responderla en cuanto actives Pirapire Pro:
+      </p>
+      <div id="football-preserved-query-card" style="background:#151821; padding:12px; border-radius:6px; font-family:var(--font-mono); font-size:12px; margin:14px 0; color:#f3f4f6;">
+      </div>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">
+        Con <strong>Pirapire Pro</strong> tenés consultas ilimitadas de fútbol, comparador de equipos y acceso total a la estrategia cripto Breakout.
+      </p>
+      <button class="btn btn-primary" style="width:100%;" onclick="window.futbolApp.openProCheckout()">
+        Activar Pirapire Pro (₲ 150.000 / 30 días)
+      </button>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL (Sandbox Payment) -->
+  <div id="checkout-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Finalizar compra — Pirapire Pro</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div style="background:#151821; border:1px solid var(--border-color); border-radius:6px; padding:14px; margin-bottom:16px; font-size:13px;">
+        <p style="margin-bottom:6px;"><strong>Vendedor:</strong> Pirapire Technologies S.A.</p>
+        <p style="margin-bottom:6px;"><strong>Total a pagar:</strong> <span style="color:var(--amber-primary); font-weight:700;">₲ 150.000</span></p>
+        <p style="margin-bottom:6px;"><strong>Vigencia:</strong> Acceso 30 días a Fútbol y Cripto Pro</p>
+        <p style="margin-bottom:0; color:var(--text-muted); font-size:11px;">Entorno de prueba (Sandbox Pagopar / SIPAP)</p>
+      </div>
+      <button id="checkout-pay-btn" class="btn btn-primary" style="width:100%;">
+        Confirmar y Activar Pro (Sandbox)
+      </button>
+    </div>
+  </div>
+
+  <script src="./js/futbol.js"></script>
+</body>
+</html>

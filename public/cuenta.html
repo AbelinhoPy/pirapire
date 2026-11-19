@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi Cuenta — Panel del Cliente Pirapire</title>
   <meta name="description" content="Gestioná tu cuenta de Pirapire, consultá tus cupos disponibles de Cripto y Fútbol, revisá tus comprobantes y descargá Pirapire Desktop.">
-  <link rel="icon" type="image/png" href="/images/logo.png">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="./images/logo.png">
+  <link rel="stylesheet" href="./css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -64,16 +64,16 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container nav-wrap">
-      <a href="/" class="brand-logo" title="Pirapire — Inicio">
-        <img src="/images/logo.png" alt="Pirapire" class="brand-img-logo">
+      <a href="index.html" class="brand-logo" title="Pirapire — Inicio">
+        <img src="./images/logo.png" alt="Pirapire" class="brand-img-logo">
       </a>
 
       <ul class="nav-links">
-        <li><a href="/">Inicio</a></li>
-        <li><a href="/#simulador">Estrategia Cripto</a></li>
-        <li><a href="/futbol">⚽ Fútbol</a></li>
-        <li><a href="/planes">Planes</a></li>
-        <li><a href="/cuenta" class="active">Mi Cuenta</a></li>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="index.html#simulador">Estrategia Cripto</a></li>
+        <li><a href="futbol.html">⚽ Fútbol</a></li>
+        <li><a href="planes.html">Planes</a></li>
+        <li><a href="cuenta.html" class="active">Mi Cuenta</a></li>
       </ul>
 
       <div style="display:flex; align-items:center; gap:12px;">
@@ -91,7 +91,10 @@
       <div id="unauth-box" style="display:none; text-align:center; padding:60px 20px;">
         <h2 style="color:#fff; margin-bottom:12px;">Acceso a tu cuenta</h2>
         <p style="color:var(--text-secondary); margin-bottom:24px;">Debés iniciar sesión para ver tu panel de cliente.</p>
-        <button class="btn btn-primary" onclick="window.location.href='/#iniciar-sesion'">Iniciar sesión / Registrarme</button>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="window.location.href='index.html'">Iniciar sesión / Registrarme</button>
+          <button class="btn btn-secondary" onclick="window.accountApp.loadDemoPreview()">Ver Demostración del Panel Pro</button>
+        </div>
       </div>
 
       <!-- Authenticated Dashboard -->
@@ -227,7 +230,7 @@
     <div class="container">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <img src="/images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
+          <img src="./images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
           <span style="font-size:12px; font-weight:700; color:var(--amber-primary); font-family:var(--font-mono);">MI CUENTA</span>
         </div>
         <div style="font-size:13px; color:var(--text-muted);">
@@ -361,7 +364,7 @@
               <td class="font-mono">${run.metrics.maxDrawdownPct}%</td>
               <td>${run.metrics.totalTrades}</td>
               <td>
-                <a href="/#simulador" class="btn btn-secondary btn-sm">Abrir</a>
+                <a href="index.html#simulador" class="btn btn-secondary btn-sm">Abrir</a>
               </td>
             `;
             tbody.appendChild(tr);
@@ -374,7 +377,31 @@
       window.accountApp = {
         logout: () => {
           localStorage.removeItem('pirapire_token');
-          window.location.href = '/';
+          window.location.href = 'index.html';
+        },
+        loadDemoPreview: () => {
+          document.getElementById('unauth-box').style.display = 'none';
+          const demoUser = {
+            email: 'trader.pro@pirapire.py',
+            plan: 'PRO',
+            remainingFreeTests: 999,
+            remainingFootballQueries: 999,
+            subscription: {
+              active: true,
+              planCode: 'PRO',
+              expiresAtFormatted: '19/12/2026'
+            },
+            invoices: [
+              {
+                orderId: 'PIR-2026-PRO-DEMO',
+                amountFormatted: '₲ 150.000',
+                status: 'PAID',
+                createdAt: new Date().toISOString()
+              }
+            ]
+          };
+          renderDashboard(demoUser);
+          document.getElementById('sha-manifest-display').textContent = 'c9a34b64345c35e3349157f397d72f815c4f894574b65ce3f5d5963ac86d295f';
         }
       };
 

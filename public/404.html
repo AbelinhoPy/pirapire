@@ -4,11 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 — Página no encontrada | Pirapire</title>
-  <link rel="icon" type="image/png" href="/images/logo.png">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="./images/logo.png">
+  <link rel="stylesheet" href="./css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    // GitHub Pages SPA router redirect
+    (function() {
+      var pathname = window.location.pathname;
+      if (pathname.endsWith('/futbol') || pathname.endsWith('/futbol/')) {
+        window.location.replace('futbol.html');
+      } else if (pathname.endsWith('/planes') || pathname.endsWith('/planes/')) {
+        window.location.replace('planes.html');
+      } else if (pathname.endsWith('/cuenta') || pathname.endsWith('/cuenta/')) {
+        window.location.replace('cuenta.html');
+      }
+    })();
+  </script>
   <style>
     .not-found-container {
       min-height: 80vh;
@@ -33,14 +46,14 @@
 
   <header class="site-header">
     <div class="container nav-wrap">
-      <a href="/" class="brand-logo" title="Pirapire — Inicio">
-        <img src="/images/logo.png" alt="Pirapire" class="brand-img-logo">
+      <a href="index.html" class="brand-logo" title="Pirapire — Inicio">
+        <img src="./images/logo.png" alt="Pirapire" class="brand-img-logo">
       </a>
       <ul class="nav-links">
-        <li><a href="/">Inicio</a></li>
-        <li><a href="/#simulador">Estrategia Cripto</a></li>
-        <li><a href="/futbol">⚽ Fútbol</a></li>
-        <li><a href="/planes">Planes</a></li>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="index.html#simulador">Estrategia Cripto</a></li>
+        <li><a href="futbol.html">⚽ Fútbol</a></li>
+        <li><a href="planes.html">Planes</a></li>
       </ul>
     </div>
   </header>
@@ -54,9 +67,9 @@
     </p>
 
     <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
-      <a href="/" class="btn btn-primary">Ir a Estrategia Cripto</a>
-      <a href="/futbol" class="btn btn-secondary">Ir a Pirapire Fútbol</a>
-      <a href="/planes" class="btn btn-secondary">Ver Planes</a>
+      <a href="index.html" class="btn btn-primary">Ir a Estrategia Cripto</a>
+      <a href="futbol.html" class="btn btn-secondary">Ir a Pirapire Fútbol</a>
+      <a href="planes.html" class="btn btn-secondary">Ver Planes</a>
     </div>
   </main>
 

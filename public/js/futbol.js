@@ -62,7 +62,7 @@
     if (el.btnAuthHeader) {
       el.btnAuthHeader.addEventListener('click', () => {
         if (state.user) {
-          window.location.href = '/cuenta';
+          window.location.href = 'cuenta.html';
         } else {
           openAuthModal('login');
         }
@@ -161,12 +161,24 @@
 
   // Load Fixtures
   async function loadFixtures() {
+    let data = null;
     const res = await apiCall('/api/futbol/fixtures');
     if (res.ok && res.data.fixtures) {
-      state.fixtures = res.data.fixtures;
-      renderFeaturedMatch(res.data.featuredMatch);
-      renderFixturesList(res.data.fixtures);
-      populateMatchSelect(res.data.fixtures);
+      data = res.data;
+    } else {
+      try {
+        const fallbackRes = await fetch('futbol_bundle.json');
+        if (fallbackRes.ok) {
+          const bundle = await fallbackRes.json();
+          data = bundle.fixtures;
+        }
+      } catch (_) {}
+    }
+    if (data && data.fixtures) {
+      state.fixtures = data.fixtures;
+      renderFeaturedMatch(data.featuredMatch);
+      renderFixturesList(data.fixtures);
+      populateMatchSelect(data.fixtures);
     }
   }
 
@@ -259,9 +271,21 @@
 
   // Load Public Sample Consultation for Visitors
   async function loadPublicSample() {
+    let analysis = null;
     const res = await apiCall('/api/futbol/public-sample');
     if (res.ok && res.data.analysis) {
-      renderAnalysis(res.data.analysis, 'VISITANTE', 1, true);
+      analysis = res.data.analysis;
+    } else {
+      try {
+        const fallbackRes = await fetch('futbol_bundle.json');
+        if (fallbackRes.ok) {
+          const bundle = await fallbackRes.json();
+          analysis = bundle.sampleAnalysis;
+        }
+      } catch (_) {}
+    }
+    if (analysis) {
+      renderAnalysis(analysis, 'VISITANTE', 1, true);
     }
   }
 
@@ -536,12 +560,23 @@
 
   // Load Active Sponsorship
   async function loadSponsorship() {
+    let sponsor = null;
     const res = await apiCall('/api/futbol/sponsor');
     if (res.ok && res.data.sponsor) {
-      state.activeSponsor = res.data.sponsor;
-      renderSponsorship(res.data.sponsor);
+      sponsor = res.data.sponsor;
     } else {
-      // Per instructions: "Si el espacio no tiene una campaña activa, no muestres un marcador de posición ni enlaces vacíos: ocultá el bloque por completo."
+      try {
+        const fallbackRes = await fetch('futbol_bundle.json');
+        if (fallbackRes.ok) {
+          const bundle = await fallbackRes.json();
+          sponsor = bundle.sponsor;
+        }
+      } catch (_) {}
+    }
+    if (sponsor) {
+      state.activeSponsor = sponsor;
+      renderSponsorship(sponsor);
+    } else {
       if (el.sponsorshipBox) el.sponsorshipBox.style.display = 'none';
     }
   }
@@ -568,9 +603,21 @@
 
   // Load Predictions Archive Table
   async function loadPredictionsArchive() {
+    let predictions = null;
     const res = await apiCall('/api/futbol/predictions/history');
     if (res.ok && res.data.predictions) {
-      renderPredictionsArchive(res.data.predictions);
+      predictions = res.data.predictions;
+    } else {
+      try {
+        const fallbackRes = await fetch('futbol_bundle.json');
+        if (fallbackRes.ok) {
+          const bundle = await fallbackRes.json();
+          predictions = bundle.archive;
+        }
+      } catch (_) {}
+    }
+    if (predictions) {
+      renderPredictionsArchive(predictions);
     }
   }
 

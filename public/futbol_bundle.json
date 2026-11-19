@@ -1,0 +1,246 @@
+{
+  "fixtures": {
+    "source": "API-Football (Modo Verificado APF / Offline Snapshot)",
+    "isLiveApi": false,
+    "league": {
+      "country": "Paraguay",
+      "leagueId": 252,
+      "name": "División Profesional de la APF",
+      "competition": "División Profesional de la Asociación Paraguaya de Fútbol (APF)",
+      "currentRound": "Fecha 17",
+      "tournaments": [
+        "Torneo Apertura",
+        "Torneo Clausura"
+      ],
+      "season": "2024 / 2025",
+      "timezone": "America/Asuncion (GMT-3)",
+      "dataAttribution": "API-Football (api-sports.io) / Asociación Paraguaya de Fútbol (APF)",
+      "averageHomeGoals": 1.38,
+      "averageAwayGoals": 1.08
+    },
+    "competition": "División Profesional de la Asociación Paraguaya de Fútbol (APF)",
+    "round": "Fecha 17",
+    "lastUpdate": "2026-11-19T14:17:41.383Z",
+    "fixtures": [
+      {
+        "id": "par-2024-cl-01",
+        "isFeatured": true,
+        "homeTeam": "Club Olimpia",
+        "awayTeam": "Club Cerro Porteño",
+        "competition": "División Profesional — Torneo Clausura (Fecha 17)",
+        "matchDate": "2024-11-17",
+        "kickoffTime": "19:30",
+        "kickoffParaguay": "Domingo 19:30 hs",
+        "paraguayTime": "19:30 hs (Horario de Asunción)",
+        "venue": "Estadio Defensores del Chaco (Asunción)",
+        "referee": "Carlos Paul Benítez",
+        "status": "SCHEDULED",
+        "statusLabel": "Programado",
+        "score": null,
+        "headToHead": {
+          "total": 5,
+          "homeWins": 2,
+          "draws": 2,
+          "awayWins": 1,
+          "lastMatch": "Cerro Porteño 1 - 1 Olimpia (08/2024)"
+        }
+      },
+      {
+        "id": "par-2024-cl-02",
+        "isFeatured": false,
+        "homeTeam": "Club Libertad",
+        "awayTeam": "Club Guaraní",
+        "competition": "División Profesional — Torneo Clausura (Fecha 17)",
+        "matchDate": "2024-11-18",
+        "kickoffTime": "17:30",
+        "paraguayTime": "17:30 hs",
+        "venue": "Estadio La Huerta (Asunción)",
+        "referee": "Derlis López",
+        "status": "SCHEDULED",
+        "statusLabel": "Programado",
+        "score": null,
+        "headToHead": {
+          "total": 5,
+          "homeWins": 3,
+          "draws": 1,
+          "awayWins": 1,
+          "lastMatch": "Guaraní 0 - 2 Libertad (07/2024)"
+        }
+      },
+      {
+        "id": "par-2024-cl-03",
+        "isFeatured": false,
+        "homeTeam": "Sportivo Luqueño",
+        "awayTeam": "Club Nacional",
+        "competition": "División Profesional — Torneo Clausura (Fecha 17)",
+        "matchDate": "2024-11-18",
+        "kickoffTime": "20:00",
+        "paraguayTime": "20:00 hs",
+        "venue": "Estadio Feliciano Cáceres (Luque)",
+        "referee": "Giancarlos Juliadoza",
+        "status": "SCHEDULED",
+        "statusLabel": "Programado",
+        "score": null,
+        "headToHead": {
+          "total": 5,
+          "homeWins": 1,
+          "draws": 2,
+          "awayWins": 2,
+          "lastMatch": "Nacional 1 - 0 Luqueño (08/2024)"
+        }
+      },
+      {
+        "id": "par-2024-cl-04",
+        "isFeatured": false,
+        "homeTeam": "Tacuary FBC",
+        "awayTeam": "Club Sol de América",
+        "competition": "División Profesional — Torneo Clausura (Fecha 17)",
+        "matchDate": "2024-11-19",
+        "kickoffTime": "18:00",
+        "paraguayTime": "18:00 hs",
+        "venue": "Estadio Jardines del Kelito (Asunción)",
+        "referee": "David Ojeda",
+        "status": "POSTPONED",
+        "statusLabel": "Aplazado",
+        "postponedNotice": "Partido aplazado por decisión arbitral y de la APF debido a precipitaciones torrenciales e inundación del césped en Asunción.",
+        "score": null,
+        "headToHead": {
+          "total": 5,
+          "homeWins": 2,
+          "draws": 1,
+          "awayWins": 2,
+          "lastMatch": "Sol de América 2 - 2 Tacuary (07/2024)"
+        }
+      },
+      {
+        "id": "par-2024-cl-05",
+        "isFeatured": false,
+        "homeTeam": "Sportivo Ameliano",
+        "awayTeam": "Sportivo Trinidense",
+        "competition": "División Profesional — Torneo Clausura (Fecha 16)",
+        "matchDate": "2024-11-15",
+        "kickoffTime": "19:00",
+        "paraguayTime": "19:00 hs",
+        "venue": "Estadio Martín Torres (Asunción)",
+        "referee": "Juan Gabriel Benítez",
+        "status": "FINISHED",
+        "statusLabel": "Finalizado",
+        "score": {
+          "home": 1,
+          "away": 0
+        },
+        "headToHead": {
+          "total": 5,
+          "homeWins": 3,
+          "draws": 1,
+          "awayWins": 1,
+          "lastMatch": "Ameliano 1 - 0 Trinidense (15/11/2024)"
+        }
+      },
+      {
+        "id": "par-2024-cl-06",
+        "isFeatured": false,
+        "homeTeam": "2 de Mayo (PJC)",
+        "awayTeam": "Atlético Tembetary (Recién ascendido)",
+        "competition": "División Profesional — Torneo Clausura (Fecha 17)",
+        "matchDate": "2024-11-20",
+        "kickoffTime": "16:30",
+        "paraguayTime": "16:30 hs",
+        "venue": "Estadio Río Parapití (Pedro Juan Caballero)",
+        "referee": "Zulma Quiñónez",
+        "status": "SCHEDULED",
+        "statusLabel": "Programado",
+        "insufficientHistory": true,
+        "score": null,
+        "headToHead": {
+          "total": 0,
+          "homeWins": 0,
+          "draws": 0,
+          "awayWins": 0,
+          "lastMatch": "Sin enfrentamientos previos registrados en Primera División"
+        }
+      }
+    ],
+    "featuredMatch": {
+      "id": "par-2024-cl-01",
+      "isFeatured": true,
+      "homeTeam": "Club Olimpia",
+      "awayTeam": "Club Cerro Porteño",
+      "competition": "División Profesional — Torneo Clausura (Fecha 17)",
+      "matchDate": "2024-11-17",
+      "kickoffTime": "19:30",
+      "kickoffParaguay": "Domingo 19:30 hs",
+      "paraguayTime": "19:30 hs (Horario de Asunción)",
+      "venue": "Estadio Defensores del Chaco (Asunción)",
+      "referee": "Carlos Paul Benítez",
+      "status": "SCHEDULED",
+      "statusLabel": "Programado",
+      "score": null,
+      "headToHead": {
+        "total": 5,
+        "homeWins": 2,
+        "draws": 2,
+        "awayWins": 1,
+        "lastMatch": "Cerro Porteño 1 - 1 Olimpia (08/2024)"
+      }
+    }
+  },
+  "sampleAnalysis": {
+    "matchId": "par-2024-cl-01",
+    "matchTitle": "Club Olimpia vs Club Cerro Porteño",
+    "competition": "División Profesional — Torneo Clausura (Fecha 17)",
+    "status": "ANSWERED",
+    "answer": "Mirá cómo llegan para el partido en Estadio Defensores del Chaco (Asunción):\n\n• **Club Olimpia**: Cosechó 10 de 15 puntos en sus últimas 5 fechas (Racha: V - V - E - V - D). En condición de local se mantiene invicto con 7 victorias y 2 empates.\n• **Club Cerro Porteño**: Sumó 10 de 15 puntos en sus últimos 5 juegos (Racha: V - D - V - E - V). Como visitante registra 4 victorias y 12 goles anotados.\n\nEn balance de momento reciente, **Ambos llegan con puntajes similares** presenta mayor regularidad en la previa.",
+    "explanation": "Mirá cómo llegan para el partido en Estadio Defensores del Chaco (Asunción):\n\n• **Club Olimpia**: Cosechó 10 de 15 puntos en sus últimas 5 fechas (Racha: V - V - E - V - D). En condición de local se mantiene invicto con 7 victorias y 2 empates.\n• **Club Cerro Porteño**: Sumó 10 de 15 puntos en sus últimos 5 juegos (Racha: V - D - V - E - V). Como visitante registra 4 victorias y 12 goles anotados.\n\nEn balance de momento reciente, **Ambos llegan con puntajes similares** presenta mayor regularidad en la previa.",
+    "model": {
+      "status": "CALCULATED",
+      "hasProbabilities": true,
+      "modelVersion": "Poisson APF v1.2.0",
+      "calculatedAt": "2026-11-19T14:17:50.936Z",
+      "homeTeam": "Club Olimpia",
+      "awayTeam": "Club Cerro Porteño",
+      "expectedGoals": {
+        "home": 1.45,
+        "away": 0.69
+      },
+      "expectedGoalsHome": 1.45,
+      "expectedGoalsAway": 0.69,
+      "probabilities": {
+        "homeWinPct": 55.5,
+        "drawPct": 26.9,
+        "awayWinPct": 17.7,
+        "mostLikelyScore": {
+          "home": 1,
+          "away": 0,
+          "label": "1 - 0"
+        }
+      },
+      "mostLikelyScore": "1 - 0",
+      "edgeAssessment": "Ventaja marcada",
+      "assumptions": [
+        "Goles modelados como procesos Poisson independientes condicionados a ratings locales y visitantes.",
+        "Ajustado a promedios históricos de la División Profesional de la APF."
+      ]
+    },
+    "factors": [
+      "Racha últimos 5 partidos: Olimpia (10 pts) vs Cerro Porteño (10 pts)",
+      "Efectividad de local: Olimpia invicto en 9 juegos"
+    ],
+    "source": "APF / Asociación Paraguaya de Fútbol (Oficial)",
+    "dataTimestamp": "2026-11-19T14:17:50.937Z",
+    "disclaimer": "Análisis estadístico basado en datos históricos verificados de la APF y modelo Poisson. Pirapire no es una casa de apuestas y no promueve juegos de azar."
+  },
+  "archive": [],
+  "sponsor": {
+    "id": 1,
+    "label": "Publicidad",
+    "brandName": "Bancard Pago Móvil",
+    "tagline": "Pagá en comercios y transferí al instante vía SIPAP en todo Paraguay",
+    "ctaText": "Conocé Pago Móvil",
+    "linkUrl": "https://www.bancard.com.py",
+    "targetUrl": "https://www.bancard.com.py",
+    "disclosure": "Espacio de patrocinio por tarifa fija. El patrocinador no influye en las conclusiones estadísticas ni pronósticos de Pirapire Fútbol.",
+    "impressions": 1,
+    "clicks": 0
+  }
+}
