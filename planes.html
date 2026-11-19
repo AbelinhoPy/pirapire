@@ -109,6 +109,17 @@
 </head>
 <body>
 
+  <!-- API Status Banner -->
+  <div id="api-status-banner" style="display:none; background:#7f1d1d; border-bottom:1px solid #ef4444; color:#fff; padding:10px 16px; font-size:13px; text-align:center;">
+    <div class="container" style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+      <span>⚠️ <strong>Modo Sin Conexión:</strong> El servidor backend de Pirapire no responde. Verificá tu conexión o configurá una URL de backend activa.</span>
+      <div style="display:flex; gap:8px;">
+        <button id="btn-retry-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Reintentar conexión</button>
+        <button id="btn-config-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Configurar URL API</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Site Header -->
   <header class="site-header">
     <div class="container nav-wrap">
@@ -203,7 +214,7 @@
           INFORMACIÓN COMERCIAL Y POLÍTICAS DE VENTA
         </div>
         <p style="margin-bottom:8px;">
-          <strong>Vendedor y Titular:</strong> Pirapire Technologies S.A. • RUC 80123456-7 (En trámite) • Asunción y Ciudad del Este, República del Paraguay.
+          <strong>Vendedor y Operación:</strong> Pirapire • Proyecto en fase beta cerrada (Entidad operadora en Paraguay: pendiente de designación formal por el titular) • Asunción / Ciudad del Este (Sede técnica preliminar).
         </p>
         <p style="margin-bottom:8px;">
           <strong>Duración y Renovación:</strong> La suscripción Pro otorga 30 días corridos de vigencia. Podés cancelar en cualquier momento desde tu panel: conservarás el acceso activo hasta el último día pagado y no se realizarán cobros sorpresivos.
@@ -224,11 +235,11 @@
     <div class="container">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <img src="/images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
+          <img src="./images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
           <span style="font-size:12px; font-weight:700; color:var(--amber-primary); font-family:var(--font-mono);">PLANES</span>
         </div>
         <div style="font-size:13px; color:var(--text-muted);">
-          © 2026 Pirapire Technologies S.A. • Todos los derechos reservados.
+          © 2026 Pirapire • Todos los derechos reservados.
         </div>
       </div>
     </div>
@@ -281,6 +292,7 @@
     </div>
   </div>
 
+  <script src="./js/config.js"></script>
   <script>
     (function() {
       'use strict';
@@ -291,17 +303,27 @@
       };
 
       async function apiCall(endpoint, options = {}) {
+        const url = window.PIRAPIRE_CONFIG
+          ? window.PIRAPIRE_CONFIG.resolveEndpoint(endpoint)
+          : (window.PirapireConfig ? window.PirapireConfig.resolveEndpoint(endpoint) : endpoint);
+
         const headers = options.headers || {};
         if (state.sessionToken) headers['Authorization'] = `Bearer ${state.sessionToken}`;
+        if (window.PIRAPIRE_CONFIG && window.PIRAPIRE_CONFIG.TUNNEL_HEADERS) {
+          Object.assign(headers, window.PIRAPIRE_CONFIG.TUNNEL_HEADERS);
+        }
         if (options.body && typeof options.body === 'object') {
           headers['Content-Type'] = 'application/json';
           options.body = JSON.stringify(options.body);
         }
         try {
-          const res = await fetch(endpoint, { credentials: 'same-origin', ...options, headers });
+          const res = await fetch(url, { ...options, headers });
           const json = await res.json();
           return { status: res.status, ok: res.ok, data: json };
         } catch (e) {
+          if (window.PIRAPIRE_CONFIG && typeof window.PIRAPIRE_CONFIG.showOfflineNotice === 'function') {
+            window.PIRAPIRE_CONFIG.showOfflineNotice();
+          }
           return { status: 500, ok: false, data: { message: e.message } };
         }
       }
@@ -319,7 +341,7 @@
         const authBtn = document.getElementById('btn-auth-header');
         if (authBtn) {
           authBtn.addEventListener('click', () => {
-            if (state.user) window.location.href = '/cuenta';
+            if (state.user) window.location.href = 'cuenta.html';
             else openAuthModal('login');
           });
         }
@@ -357,7 +379,7 @@
             badge.className = 'badge badge-green';
             if (proBtn) {
               proBtn.textContent = 'Tu suscripción Pro está activa';
-              proBtn.onclick = () => window.location.href = '/cuenta';
+              proBtn.onclick = () => window.location.href = 'cuenta.html';
             }
           } else {
             badge.textContent = 'PLAN BÁSICO';
@@ -443,21 +465,17 @@
           payBtn.disabled = true;
           payBtn.textContent = 'Verificando pago sandbox...';
 
-          const webhookRes = await apiCall('/api/billing/webhook', {
+          const simRes = await apiCall('/api/billing/sandbox/simulate-payment', {
             method: 'POST',
             body: {
-              eventType: 'PAYMENT_SUCCESS',
-              orderId: session.orderId,
-              idempotencyKey: `idem_planes_${session.orderId}_${Date.now()}`,
-              amountPyg: session.amountPyg,
-              paymentMethod: 'SIPAP_TRANSFER'
+              orderId: session.orderId
             }
           });
 
           payBtn.disabled = false;
           payBtn.textContent = 'Confirmar y Activar Pro (Sandbox)';
 
-          if (webhookRes.ok) {
+          if (simRes.ok) {
             modal.classList.remove('active');
             alert('¡Pago verificado con éxito! Tu acceso a Pirapire Pro ha sido activado.');
             await loadAuth();
@@ -469,7 +487,7 @@
               window.location.href = 'cuenta.html';
             }
           } else {
-            alert('Error al confirmar el pago en el sandbox.');
+            alert('Error al confirmar el pago en el sandbox: ' + (simRes.data.message || ''));
           }
         };
 

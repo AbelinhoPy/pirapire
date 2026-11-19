@@ -32,7 +32,7 @@ test('Billing & Webhook Lifecycle: Checkout -> Success -> Idempotent Duplicate -
   assert.ok(session.orderId.startsWith('PIR-'));
   assert.strictEqual(session.amountPyg, 190000);
   assert.strictEqual(session.currency, 'PYG');
-  assert.strictEqual(session.merchant.name, 'Pirapire Technologies S.A.');
+  assert.strictEqual(session.merchant.name, PRICING_CONFIG.merchant.name);
   assert.strictEqual(session.accessDurationDays, 30);
 
   // 3. Webhook: PAYMENT_SUCCESS

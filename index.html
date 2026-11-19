@@ -13,6 +13,17 @@
 </head>
 <body>
 
+  <!-- API Status Banner -->
+  <div id="api-status-banner" style="display:none; background:#7f1d1d; border-bottom:1px solid #ef4444; color:#fff; padding:10px 16px; font-size:13px; text-align:center;">
+    <div class="container" style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+      <span>⚠️ <strong>Modo Sin Conexión:</strong> El servidor backend de Pirapire no responde. La portada muestra la simulación histórica precalculada.</span>
+      <div style="display:flex; gap:8px;">
+        <button id="btn-retry-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Reintentar conexión</button>
+        <button id="btn-config-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Configurar URL API</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Site Header -->
   <header class="site-header">
     <div class="container nav-wrap">
@@ -39,7 +50,7 @@
   <section class="hero-section">
     <div class="container">
       <div class="hero-header">
-        <span class="badge badge-amber">Estrategia Breakout • Datos Reales Binance</span>
+        <span class="badge badge-amber">SIMULACIÓN HISTÓRICA PRECALCULADA • VELAS REALES BINANCE SPOT</span>
         <h1 class="hero-title">Bitcoin cayó.<br><span style="color:var(--amber-primary);">¿Qué habría hecho Breakout?</span></h1>
         <p class="hero-subtitle">
           Mirá dónde entró el bot, dónde salió y cómo terminó la simulación. Después probá con tus propias fechas.
@@ -300,7 +311,7 @@
           <img src="./images/logo.png" alt="Pirapire" style="height:26px; object-fit:contain;">
         </div>
         <div>
-          © 2026 Pirapire Technologies S.A. • Asunción y Ciudad del Este, Paraguay.
+          © 2026 Pirapire • Asunción y Ciudad del Este, Paraguay.
         </div>
       </div>
 
@@ -336,8 +347,9 @@
           Ingresar
         </button>
       </form>
-      <div style="margin-top:16px; text-align:center; font-size:13px;">
+      <div style="margin-top:16px; text-align:center; font-size:13px; display:flex; flex-direction:column; gap:8px;">
         <a href="javascript:void(0)" id="auth-modal-toggle">¿No tenés cuenta? Registrate gratis</a>
+        <a href="reset-password.html" style="color:var(--text-muted); font-size:12px;">¿Olvidaste tu contraseña? Recuperala aquí</a>
       </div>
     </div>
   </div>
@@ -371,7 +383,7 @@
         <button class="modal-close">&times;</button>
       </div>
       <div style="background:#151821; border:1px solid var(--border-color); border-radius:6px; padding:14px; margin-bottom:16px; font-size:13px;">
-        <p style="margin-bottom:6px;"><strong>Vendedor:</strong> Pirapire Technologies S.A.</p>
+        <p style="margin-bottom:6px;"><strong>Vendedor:</strong> Pirapire (Beta Cerrada)</p>
         <p style="margin-bottom:6px;"><strong>Identificador:</strong> <span id="checkout-order-id" class="font-mono"></span></p>
         <p style="margin-bottom:6px;"><strong>Total a pagar:</strong> <span id="checkout-amount" style="color:var(--amber-primary); font-weight:700; font-size:16px;"></span></p>
         <p style="margin-bottom:6px;"><strong>Vigencia de acceso:</strong> <span id="checkout-expires"></span></p>
@@ -431,6 +443,7 @@
   </div>
 
   <!-- Application Script -->
+  <script src="./js/config.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

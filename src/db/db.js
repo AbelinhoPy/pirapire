@@ -99,6 +99,16 @@ function initSchema(db) {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS download_tickets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ticket TEXT UNIQUE NOT NULL,
+      user_id INTEGER NOT NULL,
+      used INTEGER DEFAULT 0,
+      created_at INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS email_outbox (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       to_email TEXT NOT NULL,
@@ -167,6 +177,7 @@ function initSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_runs_user ON backtest_runs(user_id);
     CREATE INDEX IF NOT EXISTS idx_tx_order ON payment_transactions(order_id);
     CREATE INDEX IF NOT EXISTS idx_tx_idempotency ON payment_transactions(idempotency_key);
+    CREATE INDEX IF NOT EXISTS idx_download_tickets ON download_tickets(ticket);
   `);
 
   // Seed default non-gambling sponsorship if empty

@@ -12,11 +12,28 @@ const {
 const { requireAuth } = require('../auth/authMiddleware');
 const { getRecentOutbox } = require('../email/emailService');
 
+function resolveFrontendUrl(req) {
+  if (req.body && req.body.appBaseUrl) {
+    return req.body.appBaseUrl.replace(/\/$/, '');
+  }
+  const origin = req.headers.origin || req.headers.referer;
+  if (origin) {
+    if (origin.includes('abelinhopy.github.io')) {
+      return 'https://abelinhopy.github.io/pirapire';
+    }
+    try {
+      const u = new URL(origin);
+      return `${u.protocol}//${u.host}`;
+    } catch (_) {}
+  }
+  return (process.env.APP_BASE_URL || 'https://abelinhopy.github.io/pirapire').replace(/\/$/, '');
+}
+
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
     const { email, password, marketingOptIn } = req.body;
-    const appBaseUrl = `${req.protocol}://${req.get('host')}`;
+    const appBaseUrl = resolveFrontendUrl(req);
     const result = await registerUser(email, password, marketingOptIn, appBaseUrl);
     res.status(201).json({
       success: true,
@@ -58,7 +75,7 @@ router.post('/login', (req, res) => {
 router.post('/request-reset', (req, res) => {
   try {
     const { email } = req.body;
-    const appBaseUrl = `${req.protocol}://${req.get('host')}`;
+    const appBaseUrl = resolveFrontendUrl(req);
     const result = requestPasswordReset(email, appBaseUrl);
     res.json(result);
   } catch (err) {

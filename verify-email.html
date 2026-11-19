@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de Cuenta — Pirapire</title>
+  <link rel="icon" type="image/png" href="./images/logo.png">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .verify-box-wrap {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .verify-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 36px 28px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-logo" title="Pirapire — Inicio">
+        <img src="./images/logo.png" alt="Pirapire" class="brand-img-logo">
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="index.html#simulador">Estrategia Cripto</a></li>
+        <li><a href="futbol.html">⚽ Fútbol</a></li>
+        <li><a href="planes.html">Planes</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="verify-box-wrap">
+    <div class="verify-card">
+      <div style="margin-bottom: 20px;">
+        <img src="./images/logo.png" alt="Pirapire" style="height: 38px; object-fit: contain;">
+      </div>
+
+      <div id="verify-state-loading">
+        <span class="badge badge-amber" style="margin-bottom: 12px;">VALIDANDO ENLACE</span>
+        <h2 style="color: #fff; margin: 12px 0;">Verificando tu cuenta...</h2>
+        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
+          Estamos confirmando tu token de verificación con el servidor de Pirapire.
+        </p>
+      </div>
+
+      <div id="verify-state-success" style="display: none;">
+        <span class="badge badge-green" style="margin-bottom: 12px;">CUENTA CONFIRMADA</span>
+        <h2 style="color: #fff; margin: 12px 0;">¡Listo! Tu cuenta está activa</h2>
+        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+          Tu dirección de correo fue verificada correctamente. Ya tenés acceso a tus <strong>5 backtests gratuitos</strong> de Breakout y a <strong>Pirapire Fútbol</strong>.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="index.html#simulador" class="btn btn-primary">Probar Estrategia Cripto</a>
+          <a href="futbol.html" class="btn btn-secondary">Ir a Pirapire Fútbol</a>
+        </div>
+      </div>
+
+      <div id="verify-state-error" style="display: none;">
+        <span class="badge badge-red" style="margin-bottom: 12px;">ENLACE NO VÁLIDO</span>
+        <h2 style="color: #fff; margin: 12px 0;">No pudimos verificar la cuenta</h2>
+        <p id="verify-error-msg" style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+          El token de verificación expiró o ya fue utilizado anteriormente.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="index.html" class="btn btn-primary">Volver al Inicio</a>
+          <a href="planes.html" class="btn btn-secondary">Ver Planes</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+      © 2026 Pirapire • Asunción y Ciudad del Este, Paraguay.
+    </div>
+  </footer>
+
+  <script src="./js/config.js"></script>
+  <script>
+    (async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+
+      const elLoading = document.getElementById('verify-state-loading');
+      const elSuccess = document.getElementById('verify-state-success');
+      const elError = document.getElementById('verify-state-error');
+      const elErrMsg = document.getElementById('verify-error-msg');
+
+      if (!token) {
+        elLoading.style.display = 'none';
+        elError.style.display = 'block';
+        elErrMsg.textContent = 'No se proporcionó ningún token de confirmación en la dirección web.';
+        return;
+      }
+
+      try {
+        const endpoint = window.PIRAPIRE_CONFIG.resolveEndpoint('/api/auth/verify-email');
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Bypass-Tunnel-Reminder': 'true'
+          },
+          mode: 'cors',
+          body: JSON.stringify({ token })
+        });
+
+        const json = await res.json();
+        elLoading.style.display = 'none';
+
+        if (res.ok && json.success) {
+          if (json.sessionToken) {
+            localStorage.setItem('pirapire_token', json.sessionToken);
+          }
+          elSuccess.style.display = 'block';
+        } else {
+          elError.style.display = 'block';
+          elErrMsg.textContent = json.message || 'El enlace de confirmación no es válido o ha expirado.';
+        }
+      } catch (err) {
+        elLoading.style.display = 'none';
+        elError.style.display = 'block';
+        elErrMsg.textContent = 'Error de conexión con el servidor. Verificá tu conexión a Internet o reintentá.';
+      }
+    })();
+  </script>
+</body>
+</html>

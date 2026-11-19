@@ -5,7 +5,8 @@ const PRICING_CONFIG = require('../billing/pricingConfig');
 const {
   createCheckoutSession,
   handleWebhookEvent,
-  getUserSubscriptionDetails
+  getUserSubscriptionDetails,
+  simulateSandboxPayment
 } = require('../billing/paymentService');
 const { requireAuth } = require('../auth/authMiddleware');
 const { getDb } = require('../db/db');
@@ -30,6 +31,20 @@ router.post('/checkout', requireAuth, (req, res) => {
     res.json({ success: true, session });
   } catch (err) {
     res.status(400).json({ error: 'CHECKOUT_FAILED', message: err.message });
+  }
+});
+
+// POST /api/billing/sandbox/simulate-payment - Server-side simulated payment confirmation
+router.post('/sandbox/simulate-payment', requireAuth, (req, res) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ error: 'MISSING_ORDER_ID', message: 'orderId es requerido.' });
+    }
+    const result = simulateSandboxPayment(orderId, req.user.id);
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(400).json({ error: 'SIMULATION_FAILED', message: err.message });
   }
 });
 

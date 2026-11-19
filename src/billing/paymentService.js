@@ -61,12 +61,12 @@ function signWebhookPayload(payloadString) {
 function handleWebhookEvent(eventPayload, signature) {
   const db = getDb();
 
-  // Signature check
+  // Strict Signature check: must be present and valid
   const payloadStr = typeof eventPayload === 'string' ? eventPayload : JSON.stringify(eventPayload);
   const expectedSignature = signWebhookPayload(payloadStr);
 
-  if (signature && signature !== expectedSignature) {
-    throw new Error('Firma de webhook no válida. Evento rechazado por seguridad.');
+  if (!signature || signature !== expectedSignature) {
+    throw new Error('Firma criptográfica de webhook requerida y no válida. Acceso no autorizado.');
   }
 
   const payload = typeof eventPayload === 'string' ? JSON.parse(eventPayload) : eventPayload;
@@ -80,6 +80,10 @@ function handleWebhookEvent(eventPayload, signature) {
   const existingTx = db.prepare('SELECT * FROM payment_transactions WHERE order_id = ?').get(orderId);
   if (!existingTx) {
     throw new Error(`Transacción para orderId ${orderId} no registrada.`);
+  }
+
+  if (amountPyg !== undefined && Number(amountPyg) !== existingTx.amount_pyg) {
+    throw new Error(`Monto de webhook (${amountPyg}) no coincide con el registrado (${existingTx.amount_pyg}).`);
   }
 
   if (existingTx.status === 'REFUNDED') {
@@ -289,9 +293,52 @@ function getUserSubscriptionDetails(userId) {
   };
 }
 
+/**
+ * Server-side sandbox payment simulation.
+ * Validates user ownership and signs the webhook internally.
+ */
+function simulateSandboxPayment(orderId, userId) {
+  if (process.env.PAYMENT_ENV === 'PRODUCTION') {
+    throw new Error('La simulación de pago sandbox está deshabilitada en el entorno de producción.');
+  }
+
+  const db = getDb();
+  const tx = db.prepare('SELECT * FROM payment_transactions WHERE order_id = ?').get(orderId);
+  if (!tx) {
+    throw new Error(`Orden ${orderId} no encontrada.`);
+  }
+
+  if (tx.user_id !== userId) {
+    throw new Error('No tenés autorización sobre esta orden de pago.');
+  }
+
+  if (tx.status === 'SUCCESS') {
+    return {
+      success: true,
+      duplicate: true,
+      status: 'ALREADY_PROCESSED',
+      message: 'Esta orden ya fue abonada y activada.',
+      orderId
+    };
+  }
+
+  const webhookPayload = {
+    eventType: 'PAYMENT_SUCCESS',
+    orderId,
+    amountPyg: tx.amount_pyg,
+    currency: tx.currency,
+    paymentMethod: 'SANDBOX_SIPAP_SIMULATED',
+    idempotencyKey: `idem_sim_${orderId}_${Date.now()}`
+  };
+
+  const signature = signWebhookPayload(JSON.stringify(webhookPayload));
+  return handleWebhookEvent(webhookPayload, signature);
+}
+
 module.exports = {
   createCheckoutSession,
   handleWebhookEvent,
   signWebhookPayload,
-  getUserSubscriptionDetails
+  getUserSubscriptionDetails,
+  simulateSandboxPayment
 };

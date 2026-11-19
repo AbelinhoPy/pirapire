@@ -5,3 +5,10 @@ node_modules/
 *.db-shm
 .DS_Store
 Thumbs.db
+
+.vercel
+.env
+*.zip
+*.exe
+storage/downloads/*.zip
+storage/downloads/*.exe

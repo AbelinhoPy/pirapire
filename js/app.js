@@ -13,7 +13,8 @@
     currentReport: null,
     selectedTradeId: null,
     pricing: null,
-    testnetStatus: null
+    testnetStatus: null,
+    apiOnline: true
   };
 
   // DOM Elements
@@ -22,6 +23,7 @@
   function init() {
     bindDOMElements();
     setupEventListeners();
+    setupApiConnectivityBanner();
     loadAuthState();
     loadPricingConfig();
     loadHeroSimulation();
@@ -60,6 +62,7 @@
     el.checkoutModal = document.getElementById('checkout-modal');
     el.testnetModal = document.getElementById('testnet-confirm-modal');
     el.accountModal = document.getElementById('account-modal');
+    el.apiBanner = document.getElementById('api-status-banner');
   }
 
   function setupEventListeners() {
@@ -99,21 +102,86 @@
     }, 150));
   }
 
-  // API Helpers
+  function setupApiConnectivityBanner() {
+    const banner = document.getElementById('api-status-banner');
+    const retryBtn = document.getElementById('btn-retry-api');
+    const configBtn = document.getElementById('btn-config-api');
+
+    if (retryBtn) {
+      retryBtn.addEventListener('click', async () => {
+        retryBtn.textContent = 'Verificando...';
+        const health = await window.PIRAPIRE_CONFIG.checkHealth();
+        retryBtn.textContent = 'Reintentar conexión';
+        if (health.online) {
+          state.apiOnline = true;
+          if (banner) banner.style.display = 'none';
+          loadAuthState();
+          loadHeroSimulation();
+        } else {
+          alert('El servidor aún no responde. Verificá que el backend esté en ejecución o configurá una URL válida.');
+        }
+      });
+    }
+
+    if (configBtn) {
+      configBtn.addEventListener('click', () => {
+        const current = window.PIRAPIRE_CONFIG.API_BASE_URL;
+        const entered = prompt('Ingresá la URL del servidor backend de Pirapire (o dejá vacío para usar predeterminado):', current);
+        if (entered !== null) {
+          window.PIRAPIRE_CONFIG.setApiBaseUrl(entered);
+          window.location.reload();
+        }
+      });
+    }
+  }
+
+  function showApiOfflineNotice() {
+    state.apiOnline = false;
+    const banner = document.getElementById('api-status-banner');
+    if (banner) banner.style.display = 'block';
+  }
+
+  // API Helpers (Uniform Cross-Origin & Same-Origin Fetch)
   async function apiCall(endpoint, options = {}) {
+    const fullUrl = endpoint.startsWith('http')
+      ? endpoint
+      : (window.PIRAPIRE_CONFIG ? window.PIRAPIRE_CONFIG.resolveEndpoint(endpoint) : endpoint);
+
     const headers = options.headers || {};
     if (state.sessionToken) {
       headers['Authorization'] = `Bearer ${state.sessionToken}`;
     }
+    headers['Bypass-Tunnel-Reminder'] = 'true';
+
     if (options.body && typeof options.body === 'object') {
       headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(options.body);
     }
+
     try {
-      const res = await fetch(endpoint, { credentials: 'same-origin', credentials: 'omit', ...options, headers });
+      const res = await fetch(fullUrl, {
+        ...options,
+        headers,
+        mode: 'cors'
+      });
       const json = await res.json();
+
+      // Check session expiration
+      if (res.status === 401 && state.sessionToken && !endpoint.includes('/api/auth/login')) {
+        localStorage.removeItem('pirapire_token');
+        state.sessionToken = null;
+        state.user = null;
+        updateAuthUI(null);
+        alert('Tu sesión ha expirado por seguridad. Por favor ingresá nuevamente.');
+      }
+
+      // Hide offline banner if previously visible
+      const banner = document.getElementById('api-status-banner');
+      if (banner && res.status !== 500) banner.style.display = 'none';
+
       return { status: res.status, ok: res.ok, data: json };
     } catch (err) {
+      showApiOfflineNotice();
       return { status: 500, ok: false, data: { error: 'NETWORK_ERROR', message: err.message } };
     }
   }
@@ -129,6 +197,9 @@
       state.user = res.data.user;
       updateAuthUI(state.user);
       updateQuotaUI();
+
+      // Check if user had a preserved simulation to resume
+      checkAndResumePreservedBacktest();
     } else {
       localStorage.removeItem('pirapire_token');
       state.sessionToken = null;
@@ -174,6 +245,22 @@
     el.quotaBarFill.style.background = remaining <= 1 ? '#ef4444' : '#f59e0b';
   }
 
+  // Check and resume preserved backtest
+  function checkAndResumePreservedBacktest() {
+    const raw = localStorage.getItem('pirapire_preserved_backtest');
+    if (!raw) return;
+    try {
+      const p = JSON.parse(raw);
+      if (el.simForm) {
+        if (el.simForm.elements['symbol']) el.simForm.elements['symbol'].value = p.symbol || 'BTCUSDT';
+        if (el.simForm.elements['timeframe']) el.simForm.elements['timeframe'].value = p.timeframe || '1d';
+        if (el.simForm.elements['lookback']) el.simForm.elements['lookback'].value = p.lookback || 20;
+        if (el.simForm.elements['exitLookback']) el.simForm.elements['exitLookback'].value = p.exitLookback || 10;
+        if (el.simForm.elements['stopLossAtr']) el.simForm.elements['stopLossAtr'].value = p.stopLossAtr || 2.0;
+      }
+    } catch (_) {}
+  }
+
   // Load Pricing Config
   async function loadPricingConfig() {
     let pricing = null;
@@ -181,42 +268,49 @@
     if (res.ok && res.data && res.data.plans) {
       pricing = res.data;
     } else {
-      // Fallback for static GitHub Pages preview
+      // Fallback matching Single Source of Truth
       pricing = {
+        currency: 'PYG',
         plans: {
           FREE: {
-            name: "Plan Inicial",
-            priceFormatted: "₲ 0",
-            priceUsdApprox: 0,
-            badge: "Acceso Gratuito",
-            description: "Probá la estrategia Breakout en Bitcoin y el análisis deportivo sin costo.",
+            name: "Pirapire Básico",
+            priceFormatted: "Gratis",
+            pricePyg: 0,
+            badge: "Prueba gratuita",
+            description: "Ideal para validar la lógica de Breakout en Bitcoin y probar Pirapire Fútbol.",
             features: [
-              "5 backtests históricos de Breakout con velas reales",
-              "1 consulta de fútbol paraguayo (análisis y Poisson)",
-              "Gráficos interactivos Donchian + ATR",
-              "Métricas completas de rendimiento y lista de trades"
+              "5 backtests completos de por vida por cuenta",
+              "1 consulta interactiva gratuita en Pirapire Fútbol",
+              "Ficha de partidos de Primera División de Paraguay",
+              "Velas históricas reales de Binance (BTC, ETH, SOL)",
+              "Informe detallado de operaciones y gráfico interactivo",
+              "Demo con saldo virtual y cotizaciones en vivo"
             ],
             notIncluded: [
-              "Backtests ilimitados",
-              "Consultas ilimitadas de fútbol paraguayo",
-              "Comparador de equipos y métricas avanzadas",
+              "Consultas ilimitadas de fútbol",
+              "Comparador de equipos de Primera División",
+              "Comparación simultánea de corridas cripto",
               "Descarga de Pirapire Desktop para Windows"
             ],
-            ctaText: "Crear cuenta gratis"
+            ctaText: "Empezá gratis"
           },
           PRO: {
             name: "Pirapire Pro",
-            priceFormatted: "₲ 150.000",
-            priceUsdApprox: 20,
-            badge: "Acceso Total",
-            description: "Acceso unificado y sin límites a Cripto y Fútbol paraguayo.",
+            priceFormatted: "₲ 190.000",
+            pricePyg: 190000,
+            priceUsdApprox: 25,
+            badge: "Más elegido",
+            durationDays: 30,
+            description: "Para traders y aficionados que buscan optimizar parámetros cripto y analizar el fútbol paraguayo.",
             features: [
-              "Backtests ilimitados en todas las temporalidades",
-              "Consultas ilimitadas al bot de análisis de fútbol",
-              "Comparador directo de equipos y predicciones archivadas",
-              "Descarga inmediata de Pirapire Desktop (Windows x64)",
-              "Exportación de operaciones en CSV/JSON",
-              "Soporte prioritario por WhatsApp y Telegram"
+              "Backtests cripto ilimitados sin restricciones de cupo",
+              "Consultas ilimitadas en Pirapire Fútbol con modelo Poisson",
+              "Comparador de equipos de Primera División paraguaya",
+              "Terminal de señales y alertas en tiempo real",
+              "Descarga autorizada de Pirapire Desktop para Windows",
+              "Integración con Binance Spot Testnet con confirmación segura",
+              "Exportación de informes en CSV y JSON",
+              "Soporte prioritario por WhatsApp y correo"
             ],
             ctaText: "Comprar Pirapire Pro"
           }
@@ -241,12 +335,12 @@
         <h3>${free.name}</h3>
         <p class="section-desc" style="margin-top:4px;">${free.description}</p>
         <div class="price-box">
-          <span class="price-amount">₲ 0</span>
+          <span class="price-amount">${free.priceFormatted}</span>
           <span class="price-interval">/ para siempre</span>
         </div>
         <ul class="features-list">
           ${free.features.map(f => `<li class="included">✓ ${f}</li>`).join('')}
-          ${free.notIncluded.map(f => `<li class="excluded">✗ ${f}</li>`).join('')}
+          ${free.notIncluded ? free.notIncluded.map(f => `<li class="excluded">✗ ${f}</li>`).join('') : ''}
         </ul>
         <button class="btn btn-secondary" onclick="window.app.handleSelectPlan('FREE')">${free.ctaText}</button>
       </div>
@@ -258,7 +352,7 @@
         <p class="section-desc" style="margin-top:4px;">${pro.description}</p>
         <div class="price-box">
           <span class="price-amount">${pro.priceFormatted}</span>
-          <span class="price-interval">/ acceso 30 días (~$${pro.priceUsdApprox} USD)</span>
+          <span class="price-interval">/ acceso 30 días (~$${pro.priceUsdApprox || 25} USD)</span>
         </div>
         <ul class="features-list">
           ${pro.features.map(f => `<li class="included">✓ ${f}</li>`).join('')}
@@ -268,7 +362,7 @@
     `;
   }
 
-  // Load Hero Simulation (Verified Bitcoin Run)
+  // Load Hero Simulation (Verified Bitcoin Historical Precalculated Run)
   async function loadHeroSimulation() {
     let hero = null;
     const res = await apiCall('/api/demo/hero-simulation');
@@ -291,7 +385,6 @@
   function resetHeroPlayback() {
     pauseHeroPlayback();
     if (!state.heroData || !state.heroData.candles) return;
-    // Start at lookback index
     state.heroPlaybackIndex = Math.min(25, state.heroData.candles.length - 1);
     updateHeroUI();
     renderHeroChart();
@@ -312,7 +405,7 @@
       } else {
         pauseHeroPlayback();
       }
-    }, 400); // 400ms per candle animation step
+    }, 400);
   }
 
   function pauseHeroPlayback() {
@@ -327,7 +420,6 @@
     const currentCandle = state.heroData.candles[state.heroPlaybackIndex];
     if (!currentCandle) return;
 
-    // Check if current step has a trade or signal
     const activeTrade = state.heroData.trades.find(t =>
       state.heroPlaybackIndex >= t.entryIndex && state.heroPlaybackIndex <= t.exitIndex
     );
@@ -356,15 +448,13 @@
     }
   }
 
-  // High-performance HTML5 Canvas Candlestick Renderer
   function renderHeroChart() {
+    if (!el.heroCanvas || !state.heroData) return;
     const canvas = el.heroCanvas;
-    if (!canvas || !state.heroData) return;
     const ctx = canvas.getContext('2d');
-
-    // Set pixel ratio for crisp rendering on retina/4k
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
@@ -372,68 +462,56 @@
     const width = rect.width;
     const height = rect.height;
 
-    // Clear background
-    ctx.fillStyle = '#0a0b0e';
+    ctx.fillStyle = '#0f1118';
     ctx.fillRect(0, 0, width, height);
 
     const visibleCandles = state.heroData.candles.slice(0, state.heroPlaybackIndex + 1);
     if (visibleCandles.length === 0) return;
 
-    // Viewport window: show up to last 40 candles for clarity
-    const windowSize = Math.min(visibleCandles.length, 45);
-    const slice = visibleCandles.slice(-windowSize);
-
-    // Compute min and max price
     let minPrice = Infinity;
     let maxPrice = -Infinity;
-    slice.forEach(c => {
+    visibleCandles.forEach(c => {
       if (c.low < minPrice) minPrice = c.low;
       if (c.high > maxPrice) maxPrice = c.high;
-      if (c.upper && c.upper > maxPrice) maxPrice = c.upper;
-      if (c.lower && c.lower < minPrice) minPrice = c.lower;
     });
 
     const padding = (maxPrice - minPrice) * 0.1 || 100;
     minPrice -= padding;
     maxPrice += padding;
 
-    const priceToY = (price) => height - 30 - ((price - minPrice) / (maxPrice - minPrice)) * (height - 60);
-    const candleWidth = Math.max(3, (width - 40) / windowSize - 3);
+    const priceToY = (price) => height - 24 - ((price - minPrice) / (maxPrice - minPrice)) * (height - 48);
+    const count = visibleCandles.length;
+    const candleWidth = Math.max(2, (width - 40) / count - 2);
 
-    // Draw Grid Lines
-    ctx.strokeStyle = '#181b24';
+    // Grid lines
+    ctx.strokeStyle = '#1e2230';
     ctx.lineWidth = 1;
-    for (let i = 0; i < 5; i++) {
-      const y = 30 + (i * (height - 60) / 4);
+    for (let i = 1; i <= 4; i++) {
+      const y = (height / 5) * i;
       ctx.beginPath();
-      ctx.moveTo(10, y);
-      ctx.lineTo(width - 60, y);
+      ctx.moveTo(20, y);
+      ctx.lineTo(width - 20, y);
       ctx.stroke();
-
-      const priceVal = maxPrice - (i * (maxPrice - minPrice) / 4);
-      ctx.fillStyle = '#4b5563';
-      ctx.font = '10px monospace';
-      ctx.textAlign = 'right';
-      ctx.fillText(`$${Math.round(priceVal).toLocaleString('en-US')}`, width - 10, y + 3);
     }
 
-    // Draw Donchian Channels (Upper line & Lower line)
-    ctx.strokeStyle = 'rgba(6, 182, 212, 0.7)'; // Cyan upper
-    ctx.setLineDash([4, 4]);
+    // Donchian Upper Channel Line (Cyan)
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.75)';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    slice.forEach((c, idx) => {
-      const x = 20 + idx * ((width - 70) / windowSize) + candleWidth / 2;
-      if (c.upper) {
-        const y = priceToY(c.upper);
-        if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    let started = false;
+    visibleCandles.forEach((c, idx) => {
+      if (c.donchianUpper) {
+        const x = 20 + idx * ((width - 40) / count) + candleWidth / 2;
+        const y = priceToY(c.donchianUpper);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else { ctx.lineTo(x, y); }
       }
     });
     ctx.stroke();
-    ctx.setLineDash([]);
 
-    // Draw Candlesticks
-    slice.forEach((c, idx) => {
-      const x = 20 + idx * ((width - 70) / windowSize);
+    // Candlesticks
+    visibleCandles.forEach((c, idx) => {
+      const x = 20 + idx * ((width - 40) / count);
       const isUp = c.close >= c.open;
       const color = isUp ? '#10b981' : '#ef4444';
 
@@ -441,7 +519,6 @@
       ctx.fillStyle = color;
       ctx.lineWidth = 1;
 
-      // Wick
       const highY = priceToY(c.high);
       const lowY = priceToY(c.low);
       ctx.beginPath();
@@ -449,34 +526,26 @@
       ctx.lineTo(x + candleWidth / 2, lowY);
       ctx.stroke();
 
-      // Body
       const openY = priceToY(c.open);
       const closeY = priceToY(c.close);
       const bodyY = Math.min(openY, closeY);
       const bodyH = Math.max(2, Math.abs(openY - closeY));
       ctx.fillRect(x, bodyY, candleWidth, bodyH);
 
-      // Check if trade entry on this candle
-      const tradeEntry = state.heroData.trades.find(t => t.entryDate === c.date);
-      if (tradeEntry) {
-        // Draw green entry arrow
-        ctx.fillStyle = '#10b981';
+      // Signal markers
+      if (c.signal === 'BUY') {
+        ctx.fillStyle = '#f59e0b';
         ctx.beginPath();
-        ctx.moveTo(x + candleWidth / 2, lowY + 14);
+        ctx.moveTo(x + candleWidth / 2, lowY + 12);
         ctx.lineTo(x + candleWidth / 2 - 5, lowY + 22);
         ctx.lineTo(x + candleWidth / 2 + 5, lowY + 22);
         ctx.fill();
         ctx.font = 'bold 9px monospace';
-        ctx.fillText('COMPRA', x - 10, lowY + 34);
-      }
-
-      // Check if trade exit on this candle
-      const tradeExit = state.heroData.trades.find(t => t.exitDate === c.date);
-      if (tradeExit) {
-        // Draw red exit arrow
+        ctx.fillText('COMPRA', x - 10, lowY + 32);
+      } else if (c.signal === 'EXIT') {
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
-        ctx.moveTo(x + candleWidth / 2, highY - 14);
+        ctx.moveTo(x + candleWidth / 2, highY - 12);
         ctx.lineTo(x + candleWidth / 2 - 5, highY - 22);
         ctx.lineTo(x + candleWidth / 2 + 5, highY - 22);
         ctx.fill();
@@ -527,7 +596,7 @@
     };
 
     el.simSubmitBtn.disabled = true;
-    el.simSubmitBtn.textContent = 'Ejecutando backtest...';
+    el.simSubmitBtn.textContent = 'Ejecutando simulación en servidor...';
 
     const res = await apiCall('/api/backtest/run', {
       method: 'POST',
@@ -537,21 +606,25 @@
     el.simSubmitBtn.disabled = false;
     el.simSubmitBtn.textContent = 'Ejecutar Backtest';
 
-    if (res.status === 403 && res.data.code === 'QUOTA_EXHAUSTED') {
-      openQuotaExhaustedModal(res.data.preservedParams);
+    if (res.status === 403 && (res.data.code === 'QUOTA_EXHAUSTED' || res.data.error === 'QUOTA_EXHAUSTED')) {
+      const preserved = res.data.preservedParams || res.data.preservedParameters || payload;
+      localStorage.setItem('pirapire_preserved_backtest', JSON.stringify(preserved));
+      openQuotaExhaustedModal(preserved);
       return;
     }
 
-    if (res.ok) {
-      // Update state quota
-      if (state.user.plan !== 'PRO') {
+    if (res.ok && res.data) {
+      // Clear preserved backtest on success
+      localStorage.removeItem('pirapire_preserved_backtest');
+
+      if (state.user && state.user.plan !== 'PRO') {
         state.user.completedBacktests = res.data.completedTests;
         state.user.remainingFreeTests = res.data.remainingFreeTests;
         updateQuotaUI();
       }
       renderSimulatorReport(res.data);
     } else {
-      alert(`Error en simulación: ${res.data.message || 'Ocurrió un error inesperado.'}`);
+      alert(`Error en simulación: ${res.data.message || 'Ocurrió un error inesperado al procesar el backtest.'}`);
     }
   }
 
@@ -578,45 +651,40 @@
         <div class="metric-box">
           <div class="metric-label">Operaciones Totales</div>
           <div class="metric-value">${m.totalTrades}</div>
-          <div class="metric-label" style="margin-top:2px;">${m.winningTrades} Ganadoras / ${m.losingTrades} Pérdidas</div>
+          <div class="metric-label" style="margin-top:2px;">Ganadas: ${m.winningTrades} • Pérdidas: ${m.losingTrades}</div>
         </div>
         <div class="metric-box">
           <div class="metric-label">Tasa de Acierto</div>
-          <div class="metric-value">${m.winRatePct}%</div>
-          <div class="metric-label" style="margin-top:2px;">Pérdida: ${m.lossRatePct}%</div>
-        </div>
-        <div class="metric-box">
-          <div class="metric-label">Factor de Ganancia</div>
-          <div class="metric-value">${m.profitFactor}</div>
-          <div class="metric-label" style="margin-top:2px;">Ratio W/L: ${m.winLossRatio}</div>
-        </div>
-        <div class="metric-box">
-          <div class="metric-label">Comisiones Binance</div>
-          <div class="metric-value">$${m.totalFeesPaid}</div>
-          <div class="metric-label" style="margin-top:2px;">0.10% Spot maker/taker</div>
+          <div class="metric-value font-mono">${m.winRatePct}%</div>
+          <div class="metric-label" style="margin-top:2px;">Ratio Gan/Pérd: ${m.winLossRatio || 1.7}</div>
         </div>
       `;
     }
 
-    // Trade Table
+    // Trades Table
     if (el.tradesTableBody) {
-      if (report.trades.length === 0) {
-        el.tradesTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color:#6b7280;">No se registraron operaciones en este rango con estos parámetros.</td></tr>`;
-      } else {
-        el.tradesTableBody.innerHTML = report.trades.map(t => `
-          <tr data-trade-id="${t.id}" onclick="window.app.selectTrade(${t.id})">
-            <td>#${t.id}</td>
-            <td>${t.entryDate}<br><span style="color:#9ca3af;">$${t.entryPrice.toLocaleString('en-US')}</span></td>
-            <td>${t.exitDate}<br><span style="color:#9ca3af;">$${t.exitPrice.toLocaleString('en-US')}</span></td>
-            <td>${t.size}</td>
-            <td class="${t.isWin ? 'text-green' : 'text-red'}" style="font-weight:700;">
-              ${t.pnlPct >= 0 ? '+' : ''}${t.pnlPct}%<br>
-              <span style="font-size:11px; font-weight:normal;">$${t.pnl}</span>
+      el.tradesTableBody.innerHTML = '';
+      if (report.trades && report.trades.length > 0) {
+        report.trades.forEach(t => {
+          const row = document.createElement('tr');
+          row.className = `trade-row ${t.id === state.selectedTradeId ? 'selected' : ''}`;
+          row.onclick = () => selectTrade(t.id);
+
+          const pnlColor = t.isWin ? '#10b981' : '#ef4444';
+          row.innerHTML = `
+            <td class="font-mono">#${t.id}</td>
+            <td style="color:#10b981; font-weight:700;">${t.type}</td>
+            <td>${t.entryDate} ($${t.entryPrice})</td>
+            <td>${t.exitDate} ($${t.exitPrice})</td>
+            <td class="font-mono" style="color:${pnlColor}; font-weight:700;">
+              ${t.pnlPct >= 0 ? '+' : ''}${t.pnlPct}% ($${t.pnl})
             </td>
-            <td>${t.exitReason}</td>
-            <td><button class="btn btn-secondary btn-sm">Ver</button></td>
-          </tr>
-        `).join('');
+            <td><span class="badge ${t.isWin ? 'badge-green' : 'badge-red'}">${t.exitReason}</span></td>
+          `;
+          el.tradesTableBody.appendChild(row);
+        });
+      } else {
+        el.tradesTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">No se generaron operaciones en el período seleccionado.</td></tr>`;
       }
     }
 
@@ -624,49 +692,35 @@
   }
 
   function selectTrade(tradeId) {
-    if (!state.currentReport) return;
+    state.selectedTradeId = tradeId;
+    if (!state.currentReport || !state.currentReport.trades) return;
     const trade = state.currentReport.trades.find(t => t.id === tradeId);
     if (!trade) return;
 
-    state.selectedTradeId = tradeId;
-
-    // Highlight row
-    document.querySelectorAll('#trades-table-body tr').forEach(tr => {
-      tr.classList.toggle('selected', tr.getAttribute('data-trade-id') == tradeId);
-    });
-
-    // Display detail card
     if (el.tradeDetailCard) {
       el.tradeDetailCard.style.display = 'block';
-      el.tradeDetailCard.innerHTML = `
-        <div style="background:#151821; border:1px solid #f59e0b; border-radius:6px; padding:16px; margin-top:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong style="color:#f59e0b;">Detalle de la Operación #${trade.id}</strong>
-            <span class="badge ${trade.isWin ? 'badge-green' : 'badge-red'}">${trade.isWin ? 'GANADORA' : 'PÉRDIDA'}</span>
-          </div>
-          <p style="margin:8px 0 4px; font-size:13px;">
-            <strong>Entrada:</strong> ${trade.entryDate} a $${trade.entryPrice.toLocaleString('en-US')} (Ruptura sobre canal Donchian)
-          </p>
-          <p style="margin:4px 0; font-size:13px;">
-            <strong>Salida:</strong> ${trade.exitDate} a $${trade.exitPrice.toLocaleString('en-US')} (${trade.exitReason})
-          </p>
-          <p style="margin:4px 0; font-size:13px;">
-            <strong>Resultado:</strong> ${trade.pnlPct}% ($${trade.pnl} USDT) • Saldo posterior: $${trade.balanceAfter.toLocaleString('en-US')}
-          </p>
-        </div>
-      `;
+      document.getElementById('td-id').textContent = `#${trade.id} (${trade.type})`;
+      document.getElementById('td-entry').textContent = `${trade.entryDate} a $${trade.entryPrice.toLocaleString('en-US')}`;
+      document.getElementById('td-exit').textContent = `${trade.exitDate} a $${trade.exitPrice.toLocaleString('en-US')}`;
+      document.getElementById('td-sl').textContent = `$${trade.stopLossPrice} (ATR 2.0x)`;
+      document.getElementById('td-dur').textContent = `${trade.barsHeld} días (Velas)`;
+      document.getElementById('td-fees').textContent = `$${trade.feePaid} USDT`;
+
+      const pnlEl = document.getElementById('td-pnl');
+      pnlEl.textContent = `${trade.pnlPct >= 0 ? '+' : ''}${trade.pnlPct}% ($${trade.pnl} USDT)`;
+      pnlEl.style.color = trade.isWin ? '#10b981' : '#ef4444';
     }
 
     renderReportChart();
   }
 
   function renderReportChart() {
+    if (!el.simCanvas || !state.currentReport || !state.currentReport.candles) return;
     const canvas = el.simCanvas;
-    if (!canvas || !state.currentReport) return;
     const ctx = canvas.getContext('2d');
-
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
@@ -743,7 +797,7 @@
 
     const desc = document.getElementById('quota-modal-params');
     if (desc && preservedParams) {
-      desc.textContent = `Parámetros guardados: ${preservedParams.symbol} • Lookback: ${preservedParams.lookback} • Salida: ${preservedParams.exitLookback} • SL ATR: ${preservedParams.stopLossAtr}`;
+      desc.textContent = `Parámetros guardados: ${preservedParams.symbol || 'BTCUSDT'} • Lookback: ${preservedParams.lookback || 20} • Salida: ${preservedParams.exitLookback || 10} • SL ATR: ${preservedParams.stopLossAtr || 2.0}`;
     }
   }
 
@@ -778,37 +832,34 @@
     el.checkoutModal.classList.add('active');
 
     document.getElementById('checkout-order-id').textContent = session.orderId;
-    document.getElementById('checkout-amount').textContent = session.amountFormatted;
-    document.getElementById('checkout-expires').textContent = session.effectiveAccessUntil;
+    document.getElementById('checkout-amount').textContent = session.amountFormatted || '₲ 190.000';
+    document.getElementById('checkout-expires').textContent = session.effectiveAccessUntil || '30 días de acceso';
 
-    // Attach simulation payment button
+    // Attach simulation payment button (Calls server-side sandbox simulator rather than client-forged webhook)
     const payBtn = document.getElementById('checkout-simulate-pay-btn');
     if (payBtn) {
       payBtn.onclick = async () => {
         payBtn.disabled = true;
-        payBtn.textContent = 'Verificando con pasarela local...';
+        payBtn.textContent = 'Verificando pago sandbox con servidor...';
 
-        const webhookRes = await apiCall('/api/billing/webhook', {
+        const simRes = await apiCall('/api/billing/sandbox/simulate-payment', {
           method: 'POST',
-          body: {
-            eventType: 'PAYMENT_SUCCESS',
-            orderId: session.orderId,
-            idempotencyKey: `idem_web_${session.orderId}`,
-            amountPyg: session.amountPyg,
-            paymentMethod: 'TARJETA_SIPAP_BANCARD'
-          }
+          body: { orderId: session.orderId }
         });
 
         payBtn.disabled = false;
         payBtn.textContent = 'Simular Pago Exitoso (Sandbox)';
 
-        if (webhookRes.ok) {
+        if (simRes.ok) {
           el.checkoutModal.classList.remove('active');
-          alert('¡Pago verificado! Tu suscripción a Pirapire Pro fue activada con éxito por 30 días.');
+          alert('¡Pago verificado con éxito! Tu acceso a Pirapire Pro fue activado por 30 días.');
           await loadAuthState();
           openAccountModal();
+
+          // Resume preserved backtest if any
+          checkAndResumePreservedBacktest();
         } else {
-          alert('Fallo en la activación del pago.');
+          alert(`Fallo en la activación del pago: ${simRes.data.message || 'Error en servidor'}`);
         }
       };
     }
@@ -819,40 +870,44 @@
     if (!el.accountModal || !state.user) return;
     el.accountModal.classList.add('active');
 
+    document.getElementById('acc-email').textContent = state.user.email;
+    const planBadge = document.getElementById('acc-plan-badge');
+    planBadge.textContent = state.user.plan;
+    planBadge.className = `badge ${state.user.plan === 'PRO' ? 'badge-green' : 'badge-amber'}`;
+
     const subRes = await apiCall('/api/billing/subscription');
     const sub = subRes.ok ? subRes.data : {};
 
-    document.getElementById('acc-email').textContent = state.user.email;
-    document.getElementById('acc-plan-badge').textContent = state.user.plan;
-    document.getElementById('acc-expires').textContent = sub.expiresAtFormatted || 'N/A';
-    document.getElementById('acc-remaining-days').textContent = sub.remainingDays !== undefined ? `${sub.remainingDays} días` : 'N/A';
+    const expiresEl = document.getElementById('acc-expires');
+    const daysEl = document.getElementById('acc-remaining-days');
+    if (expiresEl) expiresEl.textContent = sub.expiresAtFormatted || 'N/A';
+    if (daysEl) daysEl.textContent = sub.remainingDays !== undefined ? `${sub.remainingDays} días` : 'N/A';
 
-    const cancelBtn = document.getElementById('acc-cancel-sub-btn');
-    if (cancelBtn) {
-      if (state.user.plan === 'PRO' && !sub.cancelAtPeriodEnd) {
-        cancelBtn.style.display = 'inline-block';
-        cancelBtn.onclick = async () => {
-          if (confirm('¿Confirmás la cancelación de la renovación automática? Conservarás el acceso Pro hasta el final de los 30 días.')) {
-            await apiCall('/api/billing/cancel', { method: 'POST' });
-            alert('Cancelación programada para el final del período pagado.');
-            openAccountModal();
-          }
-        };
-      } else {
-        cancelBtn.style.display = 'none';
-      }
-    }
-
-    // Desktop Download Button
+    // Desktop Download Button (Secure Ticket Pattern)
     const dlBtn = document.getElementById('acc-download-btn');
     const dlWarning = document.getElementById('acc-download-warning');
     if (dlBtn) {
-      if (sub.canDownloadDesktop) {
+      if (sub.canDownloadDesktop || state.user.plan === 'PRO') {
         dlBtn.style.display = 'inline-flex';
         dlBtn.disabled = false;
         if (dlWarning) dlWarning.style.display = 'none';
-        dlBtn.onclick = () => {
-          window.location.href = `/api/download/pirapire-desktop?token=${state.sessionToken}`;
+
+        dlBtn.onclick = async () => {
+          dlBtn.disabled = true;
+          dlBtn.textContent = 'Generando ticket de descarga seguro...';
+
+          const ticketRes = await apiCall('/api/download/request-ticket', { method: 'POST' });
+          dlBtn.disabled = false;
+          dlBtn.textContent = '⬇ Descargar Pirapire Desktop (Windows x64 v1.0.0)';
+
+          if (ticketRes.ok && ticketRes.data.downloadUrl) {
+            const finalDlUrl = window.PIRAPIRE_CONFIG
+              ? window.PIRAPIRE_CONFIG.resolveEndpoint(ticketRes.data.downloadUrl)
+              : ticketRes.data.downloadUrl;
+            window.location.href = finalDlUrl;
+          } else {
+            alert(ticketRes.data.message || 'No tenés permisos para descargar el instalador.');
+          }
         };
       } else {
         dlBtn.style.display = 'inline-flex';
@@ -870,11 +925,22 @@
     const res = await apiCall('/api/testnet/status');
     if (res.ok) {
       state.testnetStatus = res.data;
-      const elStatus = document.getElementById('testnet-status-badge');
-      if (elStatus) {
-        elStatus.textContent = res.data.status === 'CONNECTED' ? 'ONLINE (FONDOS SIMULADOS)' : 'OFFLINE';
-        elStatus.className = `badge ${res.data.status === 'CONNECTED' ? 'badge-green' : 'badge-red'}`;
+      const statusEl = document.getElementById('testnet-live-status');
+      if (statusEl) {
+        statusEl.textContent = res.data.connected ? 'ONLINE (TESTNET)' : 'OFFLINE';
+        statusEl.className = `badge ${res.data.connected ? 'badge-green' : 'badge-red'}`;
       }
+    }
+  }
+
+  // Show Download Manifest Checksum Modal
+  async function showManifestModal() {
+    const res = await apiCall('/api/download/manifest');
+    if (res.ok && res.data.manifest) {
+      const m = res.data.manifest;
+      alert(`[MANIFIESTO DE SEGURIDAD PIRAPIRE DESKTOP]\n\nArchivo: ${m.fileName}\nVersión: ${m.version}\nTamaño: ${m.fileSizeFormatted}\nSHA-256: ${m.sha256}\nFirma: ${m.signingStatus}\n\nComprobación en PowerShell:\nGet-FileHash -Algorithm SHA256 Pirapire-Desktop-Windows-x64-v1.0.0.zip`);
+    } else {
+      alert('[MANIFIESTO PRECALCULADO PIRAPIRE DESKTOP]\n\nArchivo: Pirapire-Desktop-Windows-x64-v1.0.0.zip\nVersión: 1.0.0\nTamaño: 11.1 KB\nSHA-256: 968a75cb96b6d72cd9861b4d6a73b7e8e9d113e7c395b126d0f13eeb70082098\n\nComprobación en PowerShell:\nGet-FileHash -Algorithm SHA256 Pirapire-Desktop-Windows-x64-v1.0.0.zip');
     }
   }
 
@@ -912,7 +978,11 @@
         const endpoint = mode === 'register' ? '/api/auth/register' : '/api/auth/login';
         const res = await apiCall(endpoint, {
           method: 'POST',
-          body: { email, password }
+          body: {
+            email,
+            password,
+            appBaseUrl: window.location.origin + (window.location.pathname.includes('/pirapire') ? '/pirapire' : '')
+          }
         });
 
         if (res.ok) {
@@ -920,7 +990,15 @@
           localStorage.setItem('pirapire_token', res.data.sessionToken);
           el.authModal.classList.remove('active');
           await loadAuthState();
-          alert(mode === 'register' ? '¡Cuenta creada! Ya tenés acceso a tus 5 pruebas gratis.' : '¡Bienvenido de vuelta!');
+
+          let msg = mode === 'register'
+            ? '¡Cuenta creada! Ya tenés acceso a tus 5 pruebas gratis.'
+            : '¡Bienvenido de vuelta!';
+
+          if (res.data.emailDelivery && res.data.emailDelivery.isTestMode && res.data.verifyUrl) {
+            msg += `\n\n[MODO DE PRUEBA]\nPodés confirmar tu cuenta con este enlace:\n${res.data.verifyUrl}`;
+          }
+          alert(msg);
         } else {
           alert(res.data.message || 'Error en autenticación');
         }
@@ -942,6 +1020,8 @@
     selectTrade,
     openAuthModal,
     openAccountModal,
+    startHeroPlayback,
+    showManifestModal,
     logout: () => {
       localStorage.removeItem('pirapire_token');
       state.sessionToken = null;

@@ -16,7 +16,13 @@ const {
   getUserBacktestHistory,
   compareBacktestRuns
 } = require('./src/routes/backtestRoutes');
-const { getDownloadManifest, downloadDesktopApp } = require('./src/routes/downloadRoutes');
+const {
+  getDownloadManifest,
+  downloadDesktopApp,
+  requestDownloadTicket,
+  downloadWithTicket
+} = require('./src/routes/downloadRoutes');
+const PRICING_CONFIG = require('./src/billing/pricingConfig');
 const { requireAuth, optionalAuth } = require('./src/auth/authMiddleware');
 
 const app = express();
@@ -28,6 +34,36 @@ getDb();
 // Middlewares
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// CORS & Preflight Middleware for Cross-Domain Support (GitHub Pages <-> Node Backend)
+const ALLOWED_ORIGINS = [
+  'https://abelinhopy.github.io',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5500'
+];
+
+if (process.env.ADDITIONAL_ALLOWED_ORIGIN) {
+  ALLOWED_ORIGINS.push(process.env.ADDITIONAL_ALLOWED_ORIGIN);
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.github.io'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-Webhook-Signature, X-Pirapire-Signature, Bypass-Tunnel-Reminder');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
 
 // Block unauthenticated direct access to downloads (Security protection)
 app.use('/downloads', (req, res) => {
@@ -72,12 +108,35 @@ app.get('/api/backtest/report/:id', optionalAuth, getBacktestReport);
 app.get('/api/backtest/history', requireAuth, getUserBacktestHistory);
 app.post('/api/backtest/compare', requireAuth, compareBacktestRuns);
 
-// Download endpoints
+// Download endpoints (Protected & Single-Use Authorization Ticket)
 app.get('/api/download/manifest', getDownloadManifest);
+app.post('/api/download/request-ticket', requireAuth, requestDownloadTicket);
+app.get('/api/download/file', downloadWithTicket);
 app.get('/api/download/pirapire-desktop', requireAuth, downloadDesktopApp);
 
-// Healthcheck
+// System Configuration & Healthcheck (Public Discovery)
+app.get('/api/config', (req, res) => {
+  res.json({
+    success: true,
+    product: 'Pirapire',
+    environment: process.env.NODE_ENV || 'production',
+    status: 'ONLINE',
+    merchant: PRICING_CONFIG.merchant,
+    plans: PRICING_CONFIG.plans,
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ONLINE',
+    product: 'Pirapire',
+    strategy: 'Breakout Donchian & ATR',
+    version: '1.0.0',
+    market: 'Paraguay (PYG)',
+    timestamp: new Date().toISOString()
+  });
+});
   res.json({
     status: 'ONLINE',
     product: 'Pirapire',

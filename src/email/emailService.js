@@ -1,6 +1,14 @@
 // src/email/emailService.js - Transactional Email Engine
 const { getDb } = require('../db/db');
 
+const DEFAULT_BASE_URL = process.env.APP_BASE_URL || 'https://abelinhopy.github.io/pirapire';
+const EMAIL_PROVIDER_MODE = process.env.SMTP_HOST ? 'LIVE_SMTP' : 'TEST_SANDBOX_OUTBOX';
+
+function cleanBaseUrl(url) {
+  const target = url || DEFAULT_BASE_URL;
+  return target.replace(/\/$/, '');
+}
+
 function recordOutboxEmail(toEmail, subject, bodyHtml, type) {
   const db = getDb();
   db.prepare(`
@@ -9,32 +17,40 @@ function recordOutboxEmail(toEmail, subject, bodyHtml, type) {
   `).run(toEmail, subject, bodyHtml, type, Date.now());
 
   // Also log to console in development
-  console.log(`[EMAIL DISPATCH] To: ${toEmail} | Type: ${type} | Subject: "${subject}"`);
+  console.log(`[EMAIL DISPATCH] [${EMAIL_PROVIDER_MODE}] To: ${toEmail} | Type: ${type} | Subject: "${subject}"`);
 }
 
-function sendVerificationEmail(toEmail, token, appBaseUrl = 'http://localhost:3000') {
-  const verifyUrl = `${appBaseUrl}/verify-email.html?token=${token}`;
+function sendVerificationEmail(toEmail, token, appBaseUrl) {
+  const base = cleanBaseUrl(appBaseUrl);
+  const verifyUrl = `${base}/verify-email.html?token=${token}`;
   const subject = 'Confirmá tu cuenta en Pirapire';
   const bodyHtml = `
     <div style="font-family: sans-serif; background: #0b0c10; color: #e5e7eb; padding: 32px; border-radius: 8px;">
       <h2 style="color: #f59e0b; margin-top: 0;">¡Bienvenido a Pirapire!</h2>
       <p>Gracias por sumarte a la plataforma de simulación y trading algorítmico para Paraguay.</p>
-      <p>Para activar tus <strong>5 backtests gratuitos</strong>, por favor confirmá tu correo haciendo clic en el siguiente enlace:</p>
+      <p>Para activar tus <strong>5 backtests gratuitos</strong> y el acceso a Pirapire Fútbol, por favor confirmá tu correo haciendo clic en el siguiente enlace:</p>
       <div style="margin: 24px 0;">
         <a href="${verifyUrl}" style="background: #f59e0b; color: #000; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block;">Confirmar mi correo</a>
       </div>
       <p style="color: #9ca3af; font-size: 13px;">O copiá este enlace en tu navegador:<br><a href="${verifyUrl}" style="color: #f59e0b;">${verifyUrl}</a></p>
       <hr style="border: 1px solid #1f2937; margin: 24px 0;">
-      <p style="color: #6b7280; font-size: 11px;">Pirapire Technologies S.A. - Asunción / Ciudad del Este, Paraguay.</p>
+      <p style="color: #6b7280; font-size: 11px;">Pirapire (Beta Cerrada) - Paraguay. Ley 4868/13 de Comercio Electrónico.</p>
     </div>
   `;
 
   recordOutboxEmail(toEmail, subject, bodyHtml, 'VERIFICATION');
-  return { success: true, verifyUrl, token };
+  return {
+    success: true,
+    verifyUrl,
+    token,
+    providerMode: EMAIL_PROVIDER_MODE,
+    isTestMode: EMAIL_PROVIDER_MODE === 'TEST_SANDBOX_OUTBOX'
+  };
 }
 
-function sendPasswordResetEmail(toEmail, token, appBaseUrl = 'http://localhost:3000') {
-  const resetUrl = `${appBaseUrl}/reset-password.html?token=${token}`;
+function sendPasswordResetEmail(toEmail, token, appBaseUrl) {
+  const base = cleanBaseUrl(appBaseUrl);
+  const resetUrl = `${base}/reset-password.html?token=${token}`;
   const subject = 'Recuperación de contraseña en Pirapire';
   const bodyHtml = `
     <div style="font-family: sans-serif; background: #0b0c10; color: #e5e7eb; padding: 32px; border-radius: 8px;">
@@ -46,12 +62,18 @@ function sendPasswordResetEmail(toEmail, token, appBaseUrl = 'http://localhost:3
       </div>
       <p style="color: #9ca3af; font-size: 13px;">Si no solicitaste este cambio, podés ignorar este mensaje.</p>
       <hr style="border: 1px solid #1f2937; margin: 24px 0;">
-      <p style="color: #6b7280; font-size: 11px;">Pirapire Technologies S.A. - Asunción / Ciudad del Este, Paraguay.</p>
+      <p style="color: #6b7280; font-size: 11px;">Pirapire (Beta Cerrada) - Paraguay.</p>
     </div>
   `;
 
   recordOutboxEmail(toEmail, subject, bodyHtml, 'PASSWORD_RESET');
-  return { success: true, resetUrl, token };
+  return {
+    success: true,
+    resetUrl,
+    token,
+    providerMode: EMAIL_PROVIDER_MODE,
+    isTestMode: EMAIL_PROVIDER_MODE === 'TEST_SANDBOX_OUTBOX'
+  };
 }
 
 function sendPurchaseReceiptEmail(toEmail, details) {

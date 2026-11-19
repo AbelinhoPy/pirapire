@@ -157,6 +157,17 @@
 </head>
 <body>
 
+  <!-- API Status Banner -->
+  <div id="api-status-banner" style="display:none; background:#7f1d1d; border-bottom:1px solid #ef4444; color:#fff; padding:10px 16px; font-size:13px; text-align:center;">
+    <div class="container" style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+      <span>⚠️ <strong>Modo Sin Conexión:</strong> El servidor backend de Pirapire no responde. Se muestran partidos y previas precalculadas.</span>
+      <div style="display:flex; gap:8px;">
+        <button id="btn-retry-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Reintentar conexión</button>
+        <button id="btn-config-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Configurar URL API</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Site Header -->
   <header class="site-header">
     <div class="container nav-wrap">
@@ -504,7 +515,7 @@
         Con <strong>Pirapire Pro</strong> tenés consultas ilimitadas de fútbol, comparador de equipos y acceso total a la estrategia cripto Breakout.
       </p>
       <button class="btn btn-primary" style="width:100%;" onclick="window.futbolApp.openProCheckout()">
-        Activar Pirapire Pro (₲ 150.000 / 30 días)
+        Activar Pirapire Pro (₲ 190.000 / 30 días)
       </button>
     </div>
   </div>
@@ -517,8 +528,8 @@
         <button class="modal-close">&times;</button>
       </div>
       <div style="background:#151821; border:1px solid var(--border-color); border-radius:6px; padding:14px; margin-bottom:16px; font-size:13px;">
-        <p style="margin-bottom:6px;"><strong>Vendedor:</strong> Pirapire Technologies S.A.</p>
-        <p style="margin-bottom:6px;"><strong>Total a pagar:</strong> <span style="color:var(--amber-primary); font-weight:700;">₲ 150.000</span></p>
+        <p style="margin-bottom:6px;"><strong>Vendedor:</strong> Pirapire (Beta Cerrada)</p>
+        <p style="margin-bottom:6px;"><strong>Total a pagar:</strong> <span style="color:var(--amber-primary); font-weight:700;">₲ 190.000</span></p>
         <p style="margin-bottom:6px;"><strong>Vigencia:</strong> Acceso 30 días a Fútbol y Cripto Pro</p>
         <p style="margin-bottom:0; color:var(--text-muted); font-size:11px;">Entorno de prueba (Sandbox Pagopar / SIPAP)</p>
       </div>
@@ -528,6 +539,7 @@
     </div>
   </div>
 
+  <script src="./js/config.js"></script>
   <script src="./js/futbol.js"></script>
 </body>
 </html>

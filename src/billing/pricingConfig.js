@@ -6,17 +6,21 @@ const PRICING_CONFIG = {
   exchangeRateUsdPyg: 7600, // Referencial mercado local CDE/Asunción
 
   merchant: {
-    name: 'Pirapire Technologies S.A.',
-    taxId: 'RUC 80123456-7 (En trámite)',
+    name: 'Pirapire',
+    commercialStatus: 'Proyecto en fase beta cerrada (Entidad comercial y titular en proceso de designación formal)',
+    taxId: '[Pendiente de confirmación por el titular]',
     country: 'Paraguay',
+    locations: 'Asunción / Ciudad del Este (Sede técnica de desarrollo preliminar; domicilio legal definitivo pendiente de designación)',
     contactEmail: 'soporte@pirapire.com.py',
+    paymentEnvironment: process.env.PAYMENT_ENV || 'SANDBOX',
+    gatewayNotice: 'Operando en pasarela Sandbox de pruebas (SIPAP / Pagopar). Integración bancaria en producción sujeta a acreditación de credenciales reales.',
     legalTerms: {
       framework: 'Ley N° 4868/13 de Comercio Electrónico de la República del Paraguay',
       rightOfWithdrawalDays: 8,
       withdrawalPolicy: 'Conforme al Art. 27 de la Ley 4868/13, el consumidor tiene derecho a rescindir el contrato dentro del plazo de 8 días corridos desde la contratación, siempre que no haya hecho uso intensivo del servicio.',
       cancellationPolicy: 'El acceso Pro se adquiere por períodos de 30 días renovables o pago único. La cancelación voluntaria mantiene el acceso activo hasta el último día del período pagado y no genera cargos futuros.',
-      refundPolicy: 'Reembolsos disponibles dentro de los 8 días para cuentas con disconformidad técnica verificada.',
-      taxDisclosure: 'Precios finales exentos de IVA temporalmente hasta emisión de RUC definitivo.'
+      refundPolicy: 'Garantía de reembolso de 8 días para cuentas con disconformidad técnica verificada.',
+      taxDisclosure: 'Comprobantes fiscales definitivos se emitirán al formalizarse la sociedad operadora.'
     }
   },
 

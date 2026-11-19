@@ -98,21 +98,31 @@
     });
   }
 
-  // API Helper with Bearer Token
+  // API Helper with Bearer Token & Cross-Origin support
   async function apiCall(endpoint, options = {}) {
+    const url = window.PIRAPIRE_CONFIG
+      ? window.PIRAPIRE_CONFIG.resolveEndpoint(endpoint)
+      : (window.PirapireConfig ? window.PirapireConfig.resolveEndpoint(endpoint) : endpoint);
+
     const headers = options.headers || {};
     if (state.sessionToken) {
       headers['Authorization'] = `Bearer ${state.sessionToken}`;
+    }
+    if (window.PIRAPIRE_CONFIG && window.PIRAPIRE_CONFIG.TUNNEL_HEADERS) {
+      Object.assign(headers, window.PIRAPIRE_CONFIG.TUNNEL_HEADERS);
     }
     if (options.body && typeof options.body === 'object') {
       headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(options.body);
     }
     try {
-      const res = await fetch(endpoint, { credentials: 'same-origin', ...options, headers });
+      const res = await fetch(url, { ...options, headers });
       const json = await res.json();
       return { status: res.status, ok: res.ok, data: json };
     } catch (err) {
+      if (window.PIRAPIRE_CONFIG && typeof window.PIRAPIRE_CONFIG.showOfflineNotice === 'function') {
+        window.PIRAPIRE_CONFIG.showOfflineNotice();
+      }
       return { status: 500, ok: false, data: { error: 'NETWORK_ERROR', message: err.message } };
     }
   }
@@ -436,21 +446,17 @@
         el.checkoutPayBtn.disabled = true;
         el.checkoutPayBtn.textContent = 'Verificando con pasarela local...';
 
-        const webhookRes = await apiCall('/api/billing/webhook', {
+        const simRes = await apiCall('/api/billing/sandbox/simulate-payment', {
           method: 'POST',
           body: {
-            eventType: 'PAYMENT_SUCCESS',
-            orderId: session.orderId,
-            idempotencyKey: `idem_futbol_${session.orderId}_${Date.now()}`,
-            amountPyg: session.amountPyg,
-            paymentMethod: 'TARJETA_SIPAP_BANCARD'
+            orderId: session.orderId
           }
         });
 
         el.checkoutPayBtn.disabled = false;
         el.checkoutPayBtn.textContent = 'Confirmar y Activar Pro (Sandbox)';
 
-        if (webhookRes.ok) {
+        if (simRes.ok) {
           el.checkoutModal.classList.remove('active');
           alert('¡Pago verificado! Tu suscripción a Pirapire Pro fue activada con éxito por 30 días.');
           await loadAuthState();
@@ -462,7 +468,7 @@
             await submitQuestion(queryToResume.question);
           }
         } else {
-          alert('Error en la confirmación del pago.');
+          alert('Error en la confirmación del pago: ' + (simRes.data.message || ''));
         }
       };
     }

@@ -61,6 +61,17 @@
 </head>
 <body>
 
+  <!-- API Status Banner -->
+  <div id="api-status-banner" style="display:none; background:#7f1d1d; border-bottom:1px solid #ef4444; color:#fff; padding:10px 16px; font-size:13px; text-align:center;">
+    <div class="container" style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+      <span>⚠️ <strong>Modo Sin Conexión:</strong> El servidor backend de Pirapire no responde. Verificá que el backend esté en ejecución o configurá su URL.</span>
+      <div style="display:flex; gap:8px;">
+        <button id="btn-retry-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Reintentar conexión</button>
+        <button id="btn-config-api" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:12px;">Configurar URL API</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="site-header">
     <div class="container nav-wrap">
@@ -111,7 +122,7 @@
               </div>
             </div>
             <div>
-              <a href="/planes" id="btn-upgrade-view" class="btn btn-primary btn-sm">
+              <a href="planes.html" id="btn-upgrade-view" class="btn btn-primary btn-sm">
                 Pasar a Pirapire Pro (₲ 190.000)
               </a>
             </div>
@@ -150,10 +161,10 @@
               </p>
             </div>
             <div>
-              <a id="btn-download-desktop" href="/api/download/pirapire-desktop" class="btn btn-primary" style="display:none;">
+              <button id="btn-download-desktop" class="btn btn-primary" style="display:none;">
                 ⬇️ Descargar ZIP (v1.0.0)
-              </a>
-              <a id="btn-download-pro-cta" href="/planes" class="btn btn-secondary">
+              </button>
+              <a id="btn-download-pro-cta" href="planes.html" class="btn btn-secondary">
                 🔒 Requiere Pirapire Pro para Descargar
               </a>
             </div>
@@ -240,6 +251,7 @@
     </div>
   </footer>
 
+  <script src="./js/config.js"></script>
   <script>
     (function() {
       'use strict';
@@ -249,13 +261,27 @@
       };
 
       async function apiCall(endpoint, options = {}) {
+        const url = window.PIRAPIRE_CONFIG
+          ? window.PIRAPIRE_CONFIG.resolveEndpoint(endpoint)
+          : (window.PirapireConfig ? window.PirapireConfig.resolveEndpoint(endpoint) : endpoint);
+
         const headers = options.headers || {};
         if (state.sessionToken) headers['Authorization'] = `Bearer ${state.sessionToken}`;
+        if (window.PIRAPIRE_CONFIG && window.PIRAPIRE_CONFIG.TUNNEL_HEADERS) {
+          Object.assign(headers, window.PIRAPIRE_CONFIG.TUNNEL_HEADERS);
+        }
+        if (options.body && typeof options.body === 'object') {
+          headers['Content-Type'] = 'application/json';
+          options.body = JSON.stringify(options.body);
+        }
         try {
-          const res = await fetch(endpoint, { credentials: 'same-origin', ...options, headers });
+          const res = await fetch(url, { ...options, headers });
           const json = await res.json();
           return { status: res.status, ok: res.ok, data: json };
         } catch (e) {
+          if (window.PIRAPIRE_CONFIG && typeof window.PIRAPIRE_CONFIG.showOfflineNotice === 'function') {
+            window.PIRAPIRE_CONFIG.showOfflineNotice();
+          }
           return { status: 500, ok: false, data: { message: e.message } };
         }
       }
@@ -304,6 +330,26 @@
           btnDl.style.display = 'inline-flex';
           btnDlProCta.style.display = 'none';
 
+          btnDl.onclick = async (e) => {
+            e.preventDefault();
+            btnDl.textContent = 'Generando pase seguro...';
+            btnDl.disabled = true;
+            const tRes = await apiCall('/api/download/request-ticket', {
+              method: 'POST',
+              body: { fileKey: 'desktop-zip' }
+            });
+            btnDl.disabled = false;
+            btnDl.textContent = '⬇️ Descargar ZIP (v1.0.0)';
+            if (tRes.ok && tRes.data.ticket) {
+              const baseDl = window.PIRAPIRE_CONFIG
+                ? window.PIRAPIRE_CONFIG.resolveEndpoint(tRes.data.downloadUrl)
+                : tRes.data.downloadUrl;
+              window.location.href = baseDl;
+            } else {
+              alert(tRes.data.message || 'No fue posible autorizar la descarga.');
+            }
+          };
+
           if (user.subscription && user.subscription.expiresAtFormatted) {
             subExpiresEl.textContent = `Vence el ${user.subscription.expiresAtFormatted}`;
           }
@@ -327,7 +373,7 @@
               <td style="font-size:12px;">${inv.payment_method || 'Sandbox'}</td>
               <td><span class="badge ${inv.status === 'SUCCESS' ? 'badge-green' : 'badge-amber'}">${inv.status}</span></td>
               <td>
-                <button class="btn btn-secondary btn-sm" onclick="alert('Comprobante ${inv.order_id}\\nVendedor: Pirapire Technologies S.A.\\nImporte: ${inv.amountFormatted}\\nEstado: ${inv.status}')">
+                <button class="btn btn-secondary btn-sm" onclick="alert('Comprobante ${inv.order_id}\\nVendedor: Pirapire (Beta Cerrada)\\nImporte: ${inv.amountFormatted}\\nEstado: ${inv.status}')">
                   Ver detalle
                 </button>
               </td>
@@ -394,14 +440,14 @@
             invoices: [
               {
                 orderId: 'PIR-2026-PRO-DEMO',
-                amountFormatted: '₲ 150.000',
+                amountFormatted: '₲ 190.000',
                 status: 'PAID',
                 createdAt: new Date().toISOString()
               }
             ]
           };
           renderDashboard(demoUser);
-          document.getElementById('sha-manifest-display').textContent = 'c9a34b64345c35e3349157f397d72f815c4f894574b65ce3f5d5963ac86d295f';
+          document.getElementById('desktop-sha256-view').textContent = 'c9a34b64345c35e3349157f397d72f815c4f894574b65ce3f5d5963ac86d295f';
         }
       };
 

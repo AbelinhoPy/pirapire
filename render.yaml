@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: pirapire-api
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node server.js
+    disk:
+      name: pirapire-data
+      mountPath: /app/storage
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_PATH
+        value: /app/storage/pirapire.db
+      - key: APP_BASE_URL
+        value: https://abelinhopy.github.io/pirapire
+      - key: PAYMENT_ENV
+        value: SANDBOX
+      - key: PAYMENT_WEBHOOK_SECRET
+        generateValue: true
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: PIRAPIRE_PRO_PRICE_PYG
+        value: "190000"
+      - key: BINANCE_PUBLIC_API_URL
+        value: https://api.binance.com
+      - key: BINANCE_TESTNET_API_URL
+        value: https://testnet.binance.vision
+      - key: ENABLE_PRODUCTION_REAL_TRADING
+        value: "false"
