@@ -277,7 +277,7 @@
             priceFormatted: "Gratis",
             pricePyg: 0,
             badge: "Prueba gratuita",
-            description: "Ideal para validar la lógica de Breakout en Bitcoin y probar Pirapire Fútbol.",
+            description: "Ideal para validar la estrategia cripto de Pirapire en Bitcoin y probar Pirapire Fútbol.",
             features: [
               "5 backtests completos de por vida por cuenta",
               "1 consulta interactiva gratuita en Pirapire Fútbol",

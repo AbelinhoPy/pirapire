@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pirapire — Probá la estrategia Breakout para cripto en Paraguay</title>
-  <meta name="description" content="Simulá y probá la estrategia algorítmica Breakout con velas reales de Binance. 5 backtests gratis para cuentas en Paraguay.">
+  <title>Pirapire — Trading Algorítmico Cripto en Paraguay</title>
+  <meta name="description" content="Simulá y probá la estrategia cripto de Pirapire con velas reales de Binance. 5 backtests gratis para cuentas en Paraguay.">
   <link rel="icon" type="image/png" href="./images/logo.png">
   <link rel="stylesheet" href="./css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,7 +51,7 @@
     <div class="container">
       <div class="hero-header">
         <span class="badge badge-amber">SIMULACIÓN HISTÓRICA PRECALCULADA • VELAS REALES BINANCE SPOT</span>
-        <h1 class="hero-title">Bitcoin cayó.<br><span style="color:var(--amber-primary);">¿Qué habría hecho Breakout?</span></h1>
+        <h1 class="hero-title">Bitcoin cayó.<br><span style="color:var(--amber-primary);">¿Qué habría hecho Pirapire?</span></h1>
         <p class="hero-subtitle">
           Mirá dónde entró el bot, dónde salió y cómo terminó la simulación. Después probá con tus propias fechas.
         </p>
@@ -140,7 +140,7 @@
     <div class="container">
       <div class="section-head">
         <span class="badge badge-amber">Strategy Tester</span>
-        <h2 class="section-title" style="margin-top:10px;">Simulador de Estrategia Breakout</h2>
+        <h2 class="section-title" style="margin-top:10px;">Simulador de Estrategia Pirapire</h2>
         <p class="section-desc">Elegí tu par, temporalidad y reglas. Mirá el informe completo de rendimiento y cada operación ejecutada.</p>
       </div>
 
@@ -279,7 +279,7 @@
         </div>
 
         <p style="color:var(--text-secondary); font-size:14px; line-height:1.6; margin-bottom:20px;">
-          Probá el ciclo completo de la estrategia Breakout en el entorno de desarrollo oficial de Binance:
+          Probá el ciclo completo de la estrategia Pirapire en el entorno de desarrollo oficial de Binance:
           <strong>Señal detectada → Vista previa con importes → Confirmación explícita del usuario → Transmisión de orden simulada.</strong>
         </p>
 
@@ -297,7 +297,7 @@
 
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="window.app.handleSelectPlan('PRO')">Adquirir Pirapire Pro para descargar App</button>
-          <a href="/api/download/manifest" target="_blank" class="btn btn-secondary">Ver Checksum SHA-256 del Instalador</a>
+          <button class="btn btn-secondary" onclick="window.open(window.PIRAPIRE_CONFIG ? window.PIRAPIRE_CONFIG.resolveEndpoint('/api/download/manifest') : '/api/download/manifest', '_blank')">Ver Checksum SHA-256 del Instalador</button>
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ router.get('/hero-simulation', (req, res) => {
     const data = JSON.parse(fs.readFileSync(HERO_RUN_PATH, 'utf8'));
     return res.json({
       success: true,
-      headline: 'Bitcoin cayó. ¿Qué habría hecho Breakout?',
+      headline: 'Bitcoin cayó. ¿Qué habría hecho Pirapire?',
       description: 'Mirá dónde entró el bot, dónde salió y cómo terminó la simulación. Después probá con tus propias fechas.',
       periodNotice: `Simulación histórica con saldo virtual sobre datos reales de Binance (${data.startDate} a ${data.endDate}).`,
       data
