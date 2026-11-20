@@ -50,7 +50,7 @@ if (process.env.ADDITIONAL_ALLOWED_ORIGIN) {
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.github.io'))) {
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.github.io') || origin.endsWith('.trycloudflare.com') || origin.endsWith('.onrender.com'))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else if (!origin) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -131,16 +131,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ONLINE',
     product: 'Pirapire',
-    strategy: 'Breakout Donchian & ATR',
-    version: '1.0.0',
-    market: 'Paraguay (PYG)',
-    timestamp: new Date().toISOString()
-  });
-});
-  res.json({
-    status: 'ONLINE',
-    product: 'Pirapire',
-    strategy: 'Breakout Donchian & ATR',
+    strategy: 'Estrategia Pirapire (Donchian & ATR)',
     version: '1.0.0',
     market: 'Paraguay (PYG)',
     timestamp: new Date().toISOString()

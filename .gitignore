@@ -12,3 +12,4 @@ Thumbs.db
 *.exe
 storage/downloads/*.zip
 storage/downloads/*.exe
+cloudflared.exe

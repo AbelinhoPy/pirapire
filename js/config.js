@@ -19,8 +19,8 @@
     }
     // On GitHub Pages: use configured production/cloud backend or current origin if same-origin
     if (isGitHubPages) {
-      // Default cloud backend (Render / Railway / localtunnel proxy)
-      return 'https://pirapire-backend.onrender.com';
+      // Default cloud backend / active public tunnel
+      return 'https://electronics-struck-smallest-flavor.trycloudflare.com';
     }
     // Same-origin (e.g. running on Node server directly)
     return '';
