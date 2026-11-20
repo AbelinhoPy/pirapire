@@ -45,10 +45,11 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// POST /api/auth/verify-email
-router.post('/verify-email', (req, res) => {
+// POST or GET /api/auth/verify-email
+router.all('/verify-email', (req, res) => {
   try {
-    const { token } = req.body;
+    const token = (req.body && req.body.token) || req.query.token;
+    if (!token) throw new Error('Token de verificación requerido');
     const result = verifyEmailToken(token);
     res.json(result);
   } catch (err) {
